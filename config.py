@@ -1,0 +1,54 @@
+# -*- coding: utf-8 -*-
+"""
+   Description:
+        -
+        -
+"""
+import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class Config:
+    DEBUG = os.getenv("DEBUG")
+    PROJECT = "inz-nft-api"
+    PROJECT_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    SENTRY_DSN = os.getenv('SENTRY_DSN')
+
+    # Setup db
+    MONGO_URI = os.getenv('MONGO_URI')
+
+    # Authentication
+    TOKEN_EXPIRE_TIME = int(os.getenv('TOKEN_EXP_TIME', default='864000'))
+
+    # Config celery worker
+    CELERY_IMPORTS = ['tasks']
+    ENABLE_UTC = True
+
+    BROKER_USE_SSL = True
+    BROKER_URL = os.getenv('BROKER_URL')
+    CELERY_QUEUES = os.getenv('CELERY_QUEUES')
+
+    CELERY_ROUTES = {
+        'worker.task_sample': {'queue': 'inz-sample-queue'},
+    }
+
+    PUBLIC_PATH = os.getenv('PUBLIC_PATH')
+
+    # Redis
+    REDIS_CLUSTER = json.loads(os.getenv('REDIS_CLUSTER'))
+    REDLOCK_REDIS = json.loads(os.getenv('REDLOCK_REDIS', '[]'))
+
+    # Blockchain
+    BSC_RPC_URI = os.getenv('BSC_RPC_URI')
+    ETH_RPC_URI = os.getenv('ETH_RPC_URI')
+    CHAIN_ID = int(os.getenv('CHAIN_ID'))
+    IPFS_TOKEN = os.getenv('IPFS_TOKEN')
+    WALLET_IAPI = os.getenv('WALLET_IAPI')
+    CONFIRM_BLOCK = 1
+    ASSETS = json.loads(os.getenv('ASSETS', '{}'))
+
+    #  Simplex config
+    SIMPLEX_URI = os.getenv('SIMPLEX_URI')
