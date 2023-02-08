@@ -5,9 +5,7 @@
         -
 """
 import asyncio
-import os
 
-import firebase_admin
 import motor
 from flask_pymongo import PyMongo
 import motor.motor_asyncio
@@ -46,8 +44,6 @@ web3_providers = {
                                       Web3.HTTPProvider(Config.ETH_RPC_URI, request_kwargs={'timeout': 60}))
 }
 socket_io = Emitter(Config.REDIS_CLUSTER[0])
-
-firebase_credentials = firebase_admin.credentials.Certificate(os.getcwd() + "/conf/keys/firebase.json")
 
 from lib import HTTPSecurity
 

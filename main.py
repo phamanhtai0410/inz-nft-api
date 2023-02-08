@@ -1,11 +1,10 @@
-import firebase_admin
 import sentry_sdk
 from flask import Flask, g
 from flask_restful import Api
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from config import Config
-from connect import connect_db, firebase_credentials
+from connect import connect_db
 
 app = Flask(__name__)
 api = Api(app)
