@@ -28,11 +28,14 @@ class NftSchema(Schema):
     _id = ObjectIdField(required=True)
     contract = fields.String(required=True)
     token_id = fields.Integer(required=True)
-    type = fields.Integer(required=True)
-    metadata_link = fields.String(required=True)
-    title = fields.String(required=False, default='')
-    description = fields.String(required=False, default='')
-    price = fields.Float(required=True)
+    standard = fields.String(required=True)
+    chain = fields.String(required=True)
+    price = fields.String(required=True)
+    amount = fields.Integer(required=True)
+    metadata_link = fields.String(required=False, default='')
+    metadata = fields.Dict(required=False, default={})
+    images = fields.List(fields.String(), required=False, default=[])
+    owner = fields.String(required=True)
 
 
 class NFTsResponseSchema(Schema):
