@@ -15,9 +15,8 @@ from web3 import Web3
 from blockchain import Blockchain
 from config import Config
 from redlock import Redlock
-
-from enums.blockchain import Chains
 from socket_io_emitter import Emitter
+from lib import Chains
 
 
 class InterfaceAsync:
@@ -38,10 +37,8 @@ redis_cluster = RedisCluster(
 dlm = Redlock(Config.REDLOCK_REDIS, retry_count=2)
 
 web3_providers = {
-    Chains.BSC_CHAIN: Blockchain(Chains.BSC_CHAIN,
-                                 Web3.HTTPProvider(Config.BSC_RPC_URI, request_kwargs={'timeout': 60})),
-    Chains.ETHEREUM_CHAIN: Blockchain(Chains.ETHEREUM_CHAIN,
-                                      Web3.HTTPProvider(Config.ETH_RPC_URI, request_kwargs={'timeout': 60}))
+    Chains.BSC: Blockchain(Chains.BSC, Web3.HTTPProvider(Config.BSC_RPC_URI, request_kwargs={'timeout': 60})),
+    Chains.ETHEREUM: Blockchain(Chains.ETHEREUM, Web3.HTTPProvider(Config.ETH_RPC_URI, request_kwargs={'timeout': 60}))
 }
 socket_io = Emitter(Config.REDIS_CLUSTER[0])
 
