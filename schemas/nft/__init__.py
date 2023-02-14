@@ -4,6 +4,5 @@
         -
         -
 """
+from .nfts import NFTsRequestSchema, NFTsResponseSchema, NFTSchema
 
-from .model import task_model
-from .smc import task_create_smc

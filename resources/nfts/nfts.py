@@ -8,8 +8,8 @@ from flask_restful import Resource
 from pydash import get
 
 from connect import security
-from schemas.nft.nfts import NFTsRequestSchema, NFTsResponseSchema
-from services.nft.nft import NFTsServices
+from schemas import NFTsRequestSchema, NFTsResponseSchema
+from services import NFTsServices
 
 
 class NFTsResource(Resource):
