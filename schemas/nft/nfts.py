@@ -1,7 +1,5 @@
 from marshmallow import Schema, EXCLUDE, fields, RAISE, validate
-
-from enums.blockchain import Chains
-from lib import ObjectIdField
+from lib import ObjectIdField, Chains
 
 
 class NFTsRequestSchema(Schema):
@@ -11,8 +9,8 @@ class NFTsRequestSchema(Schema):
     page = fields.Integer(required=False, default=1, allow_none=True)
     page_size = fields.Integer(required=False, default=10, allow_none=True)
     chain = fields.String(required=True, validate=validate.OneOf([
-        Chains.BSC_CHAIN,
-        Chains.ETHEREUM_CHAIN
+        Chains.BSC,
+        Chains.ETHEREUM
     ]), allow_none=True)
     sort_price = fields.String(required=False, validate=validate.OneOf([
         'desc',
@@ -20,7 +18,7 @@ class NFTsRequestSchema(Schema):
     ]), allow_none=True)
 
 
-class NftSchema(Schema):
+class NFTSchema(Schema):
     class Meta:
         unknown = EXCLUDE
         ordered = True
@@ -49,7 +47,7 @@ class NFTsResponseSchema(Schema):
     #     'page_size': page_size,
     #     'page': page
     # }
-    items = fields.List(fields.Nested(NftSchema), data_key='items', missing=[])
+    items = fields.List(fields.Nested(NFTSchema()), data_key='items', missing=[])
     num_of_page = fields.Integer(data_key='num_of_page', missing=0)
     page_size = fields.Integer(data_key='page_size', missing=10)
     page = fields.Integer(data_key='page', missing=1)
