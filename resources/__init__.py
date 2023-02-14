@@ -15,5 +15,5 @@ api_resources = {
     '/common/health_check': HealthCheck,
     # **{f'/iapi{k}': val for k, val in iapi_resources.items()},
     **{f'{k}': val for k, val in nfts_resources.items()},
-    **{f'smc{k}': val for k, val in smc_resources.items()},
+    **{f'/smc{k}': val for k, val in smc_resources.items()},
 }
