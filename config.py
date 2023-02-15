@@ -52,3 +52,7 @@ class Config:
 
     #  Simplex config
     SIMPLEX_URI = os.getenv('SIMPLEX_URI')
+
+    # ANOTHER SERVICE URL
+    INZ_DAPP_BASE_URL = os.getenv('INZ_DAPP_BASE_URL')
+    IAPI_BASE_URL = os.getenv('IAPI_BASE_URL')
