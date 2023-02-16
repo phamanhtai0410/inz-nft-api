@@ -41,7 +41,7 @@ class SMCUpdateNonReleasedContractRequestSchema(Schema):
         ContractMethod.USER_WALLET,
         ContractMethod.INZ_WALLET
     ]))
-    random_nft = fields.Bool(allow_none=True)
+    is_box = fields.Bool(allow_none=True)
     nft_list = fields.List(fields.Nested(NFTOfContractSchema()))
     template_id = fields.String(required=False, allow_none=True, validate=IsObjectId())
     standard = fields.String(required=False, allow_none=True, validate=validate.OneOf([

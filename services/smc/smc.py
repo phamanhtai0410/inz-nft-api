@@ -2,6 +2,7 @@ from bson import ObjectId
 from pydash import get
 
 from config import Config
+from enums.contract import ContractInsertType
 from lib import ClientAPI, BadRequest
 from lib.logger import debug
 from models import NFTContractsModel
@@ -28,7 +29,7 @@ class SMCServices:
 
         _list_nft = get(data, 'nft_list')
 
-        if get(data, 'random_nft'):
+        if get(data, 'is_box'):
             _sum_percent = sum([nft['percent'] if 'percent' in nft else 0 for nft in _list_nft])
             if _sum_percent != 100:
                 raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
@@ -60,9 +61,9 @@ class SMCServices:
         debug("Contract dict have index_type 2: ", data)
 
         NFTContractsModel.insert_one({
-            'user_id': user,
+            'user_id': ObjectId(user),
             **data,
-            'type': 'CREATE',
+            'type': ContractInsertType.CREATE,
             'is_deleted': False,
             'deleted_time': None,
             'deleted_by': '',
@@ -84,7 +85,7 @@ class SMCServices:
         if _contract["is_deleted"]:
             raise BadRequest(msg="This campaign's already been deleted!")
 
-        if data["random_nft"]:
+        if data["is_box"]:
             _sum_percent = sum([nft['percent'] for nft in _list_nft])
             if _sum_percent != 100:
                 raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
@@ -145,4 +146,41 @@ class SMCServices:
         )
 
         return contract_id, True
+
+    @classmethod
+    def import_contract(cls, user, data, contract_address):
+        _contract = NFTContractsModel.find_one(filter={
+            'contract': contract_address,
+            'chain': get(data, 'chain'),
+            'user_id': ObjectId(user)
+        })
+        if _contract is not None:
+            raise BadRequest(msg='Invalid params.', errors=['Contract is exist.'])
+
+        # Check if subdomain
+        _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
+            get(data, 'website_domain'))
+
+        if _check_domain_status_code != 200:
+            raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
+
+        if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
+            raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
+
+        debug("*** Contract import : ", data)
+        _contract_id = NFTContractsModel.insert_one({
+            'user_id': ObjectId(user),
+            **data,
+            'max_allocation': None,
+            'nft_list': [],
+            'is_released': True,
+            'type': ContractInsertType.IMPORT,
+            'is_deleted': False,
+            'deleted_time': None,
+            'deleted_by': '',
+            'created_by': 'inz-nft-api:services:SMCServices:import_contract',
+            'updated_by': ''
+        })
+
+        return _contract_id, True
 
