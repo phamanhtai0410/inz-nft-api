@@ -33,7 +33,7 @@ class SMCCreateContractRequestSchema(Schema):
     name = fields.String(required=True)
     symbol = fields.String(required=True)
     total_supply = fields.Integer(required=True, validate=is_valid_number)
-    total_raise = fields.Integer(required=True, validate=is_valid_number)
+    total_raise = fields.Float(required=True, validate=is_valid_number)
     chain = fields.String(required=True, validate=validate.OneOf([
         Chains.BSC,
         Chains.ETHEREUM
