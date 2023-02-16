@@ -46,8 +46,6 @@ class SMCServices:
         _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
             get(data, 'website_domain'))
 
-        print(_check_domain_status_code, _check_subdomain_resp)
-
         if _check_domain_status_code != 200:
             raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
 
