@@ -6,11 +6,12 @@
 """
 
 
-class Units:
+class Currency:
     USDT = 'USDT'
     ETH = 'ETH'
     BNB = 'BNB'
     FIAT = 'FIAT'
+    BUSD = 'BUSD'
 
 
 # class Status:

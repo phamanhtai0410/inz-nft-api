@@ -15,7 +15,7 @@ from web3.exceptions import TransactionNotFound
 
 from blockchain.abi import erc20_abi
 from config import Config
-from enums.order import Units
+from enums.order import Currency
 
 
 class Blockchain(Web3):
@@ -74,7 +74,7 @@ class Blockchain(Web3):
                 self.toChecksumAddress(get(Config.ASSETS, f'{self.chain}.ETH')),
                 abi=erc20_abi
             )
-            self.decimals[Units.ETH] = _smc.functions.decimals().call()
+            self.decimals[Currency.ETH] = _smc.functions.decimals().call()
             return _smc
         except:
             sentry_sdk.capture_exception()
@@ -90,7 +90,7 @@ class Blockchain(Web3):
                 self.toChecksumAddress(get(Config.ASSETS, f'{self.chain}.USDT')),
                 abi=erc20_abi
             )
-            self.decimals[Units.USDT] = _smc.functions.decimals().call()
+            self.decimals[Currency.USDT] = _smc.functions.decimals().call()
             return _smc
         except:
             sentry_sdk.capture_exception()
@@ -106,7 +106,7 @@ class Blockchain(Web3):
                 self.toChecksumAddress(get(Config.ASSETS, f'{self.chain}.BNB')),
                 abi=erc20_abi
             )
-            self.decimals[Units.BNB] = _smc.functions.decimals().call()
+            self.decimals[Currency.BNB] = _smc.functions.decimals().call()
             return _smc
         except:
             sentry_sdk.capture_exception()

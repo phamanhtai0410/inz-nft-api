@@ -5,5 +5,7 @@
         -
 """
 
-from .model import task_model
-from .smc import task_create_smc
+
+class ContractMethod:
+    USER_WALLET = 0
+    INZ_WALLET = 1
