@@ -11,7 +11,7 @@ from services.iapi import IAPIServices
 _inz_dapp_client = ClientAPI(host=Config.INZ_DAPP_BASE_URL)
 _inz_dapp_services = INZDappServices(client=_inz_dapp_client)
 
-_iapi_client = ClientAPI(host=Config.INZ_DOMAIN_BASE_URL)
+_iapi_client = ClientAPI(host=Config.INZ_IAPI_BASE_URL)
 _iapi_services = IAPIServices(client=_iapi_client)
 
 
@@ -43,14 +43,14 @@ class SMCServices:
                 raise BadRequest(msg='Invalid Nft List', errors=['Total raise not valid!'])
 
         # Check if subdomain
-        # _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
-        #     get(data, 'website_domain'))
-        #
-        # if _check_domain_status_code != 200:
-        #     raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
-        #
-        # if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
-        #     raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
+        _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
+            get(data, 'website_domain'))
+
+        if _check_domain_status_code != 200:
+            raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
+
+        if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
+            raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
         debug("*** Contract dict : ", data)
         debug("*** Contract dict - nft list: ", _list_nft)
