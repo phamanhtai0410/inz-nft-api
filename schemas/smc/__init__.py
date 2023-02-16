@@ -5,4 +5,6 @@
         -
 """
 from .create_contract import SMCCreateContractResponseSchema, SMCCreateContractRequestSchema
+from .update_non_released_contract import SMCUpdateNonReleasedContractRequestSchema, \
+    SMCUpdateNonReleasedContractResponseSchema
 

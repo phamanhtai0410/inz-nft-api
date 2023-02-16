@@ -6,7 +6,7 @@ from helper.validator import is_valid_number, is_valid_subdomain
 from lib import Chains, TokenStandard, IsObjectId, DatetimeField
 
 
-class NFTOfCampaignSchema(Schema):
+class NFTOfContractSchema(Schema):
     class Meta:
         unknown = INCLUDE
         ordered = True
@@ -20,7 +20,7 @@ class NFTOfCampaignSchema(Schema):
     description = fields.Str(allow_none=True)
 
 
-class CampaignDescriptionSchema(Schema):
+class ContractDescriptionSchema(Schema):
     title = fields.Str(required=True)
     html_content = fields.Str(required=True)
     image_uri = fields.Str(allow_none=True, missing='')
@@ -48,7 +48,7 @@ class SMCCreateContractRequestSchema(Schema):
         TokenStandard.ERC721,
         TokenStandard.ERC1155
     ]))
-    description = fields.List(fields.Nested(CampaignDescriptionSchema()), allow_none=True, missing=[])
+    description = fields.List(fields.Nested(ContractDescriptionSchema()), allow_none=True, missing=[])
     about_owner = fields.Str(allow_none=True)
     owner_image_url = fields.Str(allow_none=True)
     image_url = fields.Str(required=True)
@@ -64,7 +64,7 @@ class SMCCreateContractRequestSchema(Schema):
         ContractMethod.INZ_WALLET
     ]))
     random_nft = fields.Bool(required=True)
-    nft_list = fields.List(fields.Nested(NFTOfCampaignSchema()))
+    nft_list = fields.List(fields.Nested(NFTOfContractSchema()))
 
 
 class SMCCreateContractResponseSchema(Schema):

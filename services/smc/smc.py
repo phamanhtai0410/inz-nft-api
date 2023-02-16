@@ -4,14 +4,14 @@ from pydash import get
 from config import Config
 from lib import ClientAPI, BadRequest
 from lib.logger import debug
-from models import NFTContractsModel
+from models import NFTContractsModel, UsersContractsModel
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
 
 _inz_dapp_client = ClientAPI(host=Config.INZ_DAPP_BASE_URL)
 _inz_dapp_services = INZDappServices(client=_inz_dapp_client)
 
-_iapi_client = ClientAPI(host=Config.IAPI_BASE_URL)
+_iapi_client = ClientAPI(host=Config.INZ_DOMAIN_BASE_URL)
 _iapi_services = IAPIServices(client=_iapi_client)
 
 
@@ -60,10 +60,61 @@ class SMCServices:
         debug("Contract dict have index_type 2: ", data)
 
         NFTContractsModel.insert_one({
+            'user_id': user,
             **data,
+            'type': 'CREATE',
+            'is_deleted': False,
+            'deleted_time': None,
+            'deleted_by': '',
             'created_by': 'inz-nft-api:services:SMCServices:create_contract',
             'updated_by': ''
         })
 
         return get(data, 'name'), get(data, 'is_released')
 
+    @classmethod
+    def update_non_released_contract(cls, user, data, contract_id):
+        _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(contract_id)})
+
+        if _contract is None:
+            raise BadRequest(msg='Invalid params.', errors=['Contract does not exist.'])
+        # if 'nft_list' in data:
+        _list_nft = data['nft_list']
+
+        if _contract["is_deleted"]:
+            raise BadRequest(msg="This campaign's already been deleted!")
+
+        if data["random_nft"]:
+            _sum_percent = sum([nft['percent'] for nft in _list_nft])
+            if _sum_percent != 100:
+                raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
+        else:
+            _sum_supply = sum([nft['supply'] for nft in _list_nft])
+            _sum_raise = sum([nft['supply'] * nft['price'] for nft in _list_nft])
+
+            if _sum_supply != data['total_supply']:
+                raise BadRequest(msg='Invalid Nft List.', errors=['Total supply not valid!'])
+            if _sum_raise != data["total_raise"]:
+                raise BadRequest(msg='Invalid Nft List.', errors=['Total raise not valid!'])
+
+        if str(_contract['user_id']) != user:
+            raise BadRequest(msg="Not have permission to update this campaign!")
+
+        if _contract['is_released']:
+            raise BadRequest(msg="This campaign's already released!")
+
+        if 'nft_list' in data:
+            data["nft_list"] = [{**x, 'index_type': get(x, 'index_type', idx + 1)} for idx, x in
+                                enumerate(data['nft_list'])]
+
+        NFTContractsModel.update_one(
+            filter={
+                "_id": ObjectId(contract_id)
+            },
+            obj={
+                **data,
+                'updated_by': 'inz-nft-api:services:SMCServices:update_non_released_contract'
+            }
+        )
+
+        return contract_id, True

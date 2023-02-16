@@ -13,5 +13,6 @@ from models.order import OrderDao
 
 NFTsModel = DaoModel(col=connect_db.db.nfts, redis=redis_cluster)
 NFTContractsModel = DaoModel(col=connect_db.db.nft_contracts, redis=redis_cluster)
+UsersContractsModel = DaoModel(col=connect_db.db.users_contracts, redis=redis_cluster)
 
 OrderModel = OrderDao(col=connect_db.db.orders, redis=redis_cluster, project=Config.PROJECT, broker=Config.BROKER_URL)
