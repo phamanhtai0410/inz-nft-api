@@ -6,5 +6,7 @@
 """
 from .nft import NFTSchema, NFTsResponseSchema, NFTsRequestSchema
 from .smc import SMCCreateContractResponseSchema, SMCCreateContractRequestSchema, \
-    SMCUpdateNonReleasedContractRequestSchema, SMCUpdateNonReleasedContractResponseSchema
+    SMCUpdateNonReleasedContractRequestSchema, SMCUpdateNonReleasedContractResponseSchema, \
+    SMCUpdateReleasedContractRequestSchema, SMCUpdateReleasedContractResponseSchema
+
 

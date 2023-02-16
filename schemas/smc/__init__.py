@@ -7,4 +7,4 @@
 from .create_contract import SMCCreateContractResponseSchema, SMCCreateContractRequestSchema
 from .update_non_released_contract import SMCUpdateNonReleasedContractRequestSchema, \
     SMCUpdateNonReleasedContractResponseSchema
-
+from .update_released_contract import SMCUpdateReleasedContractRequestSchema, SMCUpdateReleasedContractResponseSchema

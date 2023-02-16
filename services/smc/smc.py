@@ -4,7 +4,7 @@ from pydash import get
 from config import Config
 from lib import ClientAPI, BadRequest
 from lib.logger import debug
-from models import NFTContractsModel, UsersContractsModel
+from models import NFTContractsModel
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
 
@@ -118,3 +118,31 @@ class SMCServices:
         )
 
         return contract_id, True
+
+    @classmethod
+    def update_released_contract(cls, user, data, contract_id):
+        _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(contract_id)})
+        if _contract is None:
+            raise BadRequest(msg='Invalid params.', errors=['Contract does not exist.'])
+
+        if str(_contract['user_id']) != user:
+            raise BadRequest(msg="Not have permission to update this campaign!")
+
+        if _contract["is_deleted"]:
+            raise BadRequest(msg="This campaign's already been deleted!")
+
+        if not _contract['is_released']:
+            raise BadRequest(msg="This campaign is not released!")
+
+        NFTContractsModel.update_one(
+            filter={
+                "_id": ObjectId(contract_id)
+            },
+            obj={
+                **data,
+                'updated_by': 'inz-nft-api:services:SMCServices:update_released_contract'
+            }
+        )
+
+        return contract_id, True
+
