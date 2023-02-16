@@ -55,4 +55,4 @@ class Config:
 
     # ANOTHER SERVICE URL
     INZ_DAPP_BASE_URL = os.getenv('INZ_DAPP_BASE_URL')
-    INZ_DOMAIN_BASE_URL = os.getenv('INZ_DOMAIN_BASE_URL')
+    INZ_IAPI_BASE_URL = os.getenv('INZ_IAPI_BASE_URL')

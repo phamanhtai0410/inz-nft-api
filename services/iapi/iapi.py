@@ -15,14 +15,14 @@ class IAPIServices:
     def __init__(self, client):
         self.client = client
 
-    def check_campaign_subdomain_valid(self, subdomain, campaign_id=None):
+    def check_campaign_subdomain_valid(self, subdomain, contract_id=None):
         try:
             _payload = {
                 "domain": subdomain
             }
 
-            if campaign_id:
-                _payload["campaign_id"] = campaign_id
+            if contract_id:
+                _payload["campaign_id"] = contract_id
 
             resp = self.client.post('/domain/check', json=_payload, verify=False, timeout=5)
             debug(f'Call IAPI service check domain {subdomain}: {resp.status_code}  {resp.text}')
@@ -39,11 +39,11 @@ class IAPIServices:
         @return: True or False
     """
 
-    def create_new_subdomain(self, subdomain, campaign_id):
+    def create_new_subdomain(self, subdomain, contract_id):
         try:
             _payload = {
                 "domain": subdomain,
-                "campaign_id": campaign_id
+                "campaign_id": contract_id
             }
 
             resp = self.client.post('/domain', json=_payload, verify=False, timeout=5)
