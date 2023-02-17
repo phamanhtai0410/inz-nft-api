@@ -4,8 +4,7 @@ from bson import ObjectId
 from pydash import get
 
 from config import Config
-from enums.contract import ContractInsertType
-from lib import ClientAPI, BadRequest, dt_utcnow
+from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType
 from lib.logger import debug
 from models import NFTContractsModel
 from services.dapp import INZDappServices
