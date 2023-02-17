@@ -9,3 +9,4 @@ from .update_non_released_contract import SMCUpdateNonReleasedContractRequestSch
     SMCUpdateNonReleasedContractResponseSchema
 from .update_released_contract import SMCUpdateReleasedContractRequestSchema, SMCUpdateReleasedContractResponseSchema
 from .import_contract import SMCImportContractRequestSchema, SMCImportContractResponseSchema
+from .release_contract import SMCReleaseContractRequestSchema, SMCReleaseContractResponseSchema
