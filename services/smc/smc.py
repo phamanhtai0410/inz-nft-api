@@ -207,6 +207,7 @@ class SMCServices:
         #       @params: subdomain need to be created
         #       @return: result of creation: True or False and created subdomain
         _creation_result, _msg = create_domain(
+            iapi_services=_iapi_services,
             contract_id=contract_id,
             subdomain=_contract["website_domain"]
         )
@@ -228,8 +229,8 @@ class SMCServices:
             print('_contract_dict after encode: ', _contract, type(_contract))
 
             create_contract_smc.delay(
-                _contract_dict=dict(_contract),
-                _contract_id=contract_id
+                contract_dict=dict(_contract),
+                contract_id=contract_id
             )
 
         return contract_id, _creation_result, _msg
