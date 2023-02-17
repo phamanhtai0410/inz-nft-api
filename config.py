@@ -46,6 +46,7 @@ class Config:
     BSC_RPC_URI = os.getenv('BSC_RPC_URI')
     ETH_RPC_URI = os.getenv('ETH_RPC_URI')
     CHAIN_ID = int(os.getenv('CHAIN_ID'))
+    
     IPFS_TOKEN = os.getenv('IPFS_TOKEN')
     WALLET_IAPI = os.getenv('WALLET_IAPI')
     CONFIRM_BLOCK = 1
