@@ -64,6 +64,7 @@ class SMCCreateContractRequestSchema(Schema):
         ContractMethod.INZ_WALLET
     ]))
     is_box = fields.Bool(required=True)
+    is_fixed_token = fields.Bool(required=True)
     nft_list = fields.List(fields.Nested(NFTOfContractSchema()))
 
 
