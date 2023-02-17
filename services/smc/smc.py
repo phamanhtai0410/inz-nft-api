@@ -5,7 +5,7 @@ from pydash import get
 
 from config import Config
 from enums.contract import ContractInsertType
-from lib import ClientAPI, BadRequest
+from lib import ClientAPI, BadRequest, dt_utcnow
 from lib.logger import debug
 from models import NFTContractsModel
 from services.dapp import INZDappServices
@@ -233,6 +233,31 @@ class SMCServices:
             )
 
         return contract_id, _creation_result, _msg
+
+
+    @classmethod
+    def delete_contract(cls, user, contract_id):
+        _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(contract_id)})
+
+        if _contract is None:
+            raise BadRequest(msg='Invalid params.', errors=['Contract does not exist.'])
+
+        if _contract['user_id'] != ObjectId(user):
+            raise BadRequest(msg="Not have permissions to release this contract!")
+
+        if _contract["is_deleted"]:
+            raise BadRequest(msg="This contract's already been deleted!")
+
+        NFTContractsModel.update_one(
+            filter={
+                "_id": ObjectId(contract_id)
+            },
+            obj={
+                "is_deleted": True,
+                "deleted_time": dt_utcnow()
+            }
+        )
+        return True
 
 
 
