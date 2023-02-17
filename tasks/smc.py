@@ -4,6 +4,7 @@ import requests
 import sentry_sdk
 
 from config import Config
+from lib.logger import debug
 from worker import worker
 
 
@@ -38,24 +39,24 @@ def create_domain(iapi_services, subdomain: str, contract_id: str):
 
 
 @worker.task(name="worker.create_campaign_smc", rate_limit="1000/s")
-def create_contract_smc(campaign_dict, contract_id, *args, **kwargs):
+def create_contract_smc(contract_dict, contract_id, *args, **kwargs):
     """
-        Call to Wallet-IAPI to create new campaign contract
+        Call to Wallet-IAPI to create new contract
     """
-    print('worker - campaign id : ', contract_id)
+    debug('worker - contract id : ', contract_id)
     _payload = {
         "_id": contract_id,
-        "start_time": campaign_dict["start_time"],
-        "end_time": campaign_dict["end_time"],
-        "symbol": campaign_dict["symbol"],
+        "start_time": contract_dict["start_time"],
+        "end_time": contract_dict["end_time"],
+        "symbol": contract_dict["symbol"],
         "market_address": Config.INZ_MARKET_ADDRESS,
-        "factory_address": Config.INZ_CAMPAIGN_FACTORY_ADDRESS,
+        "factory_address": Config.INZ_FACTORY_ADDRESS,
         "token_address": Config.INZ_COIN_TOKEN_ADDRESS,
-        "is_fixed_token": campaign_dict["is_fixed_token"] if campaign_dict["is_fixed_token"] else False,
-        "name": campaign_dict["name"]
+        "is_fixed_token": contract_dict["is_fixed_token"] if contract_dict["is_fixed_token"] else False,
+        "name": contract_dict["name"]
     }
 
-    print("worker : ", _payload)
+    debug("worker : ", _payload)
     resp = requests.post(
         f"{Config.WALLET_IAPI}/deploy/campaign",
         json=_payload,

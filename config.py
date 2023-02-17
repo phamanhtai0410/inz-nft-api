@@ -32,7 +32,8 @@ class Config:
     CELERY_QUEUES = os.getenv('CELERY_QUEUES')
 
     CELERY_ROUTES = {
-        'worker.task_sample': {'queue': 'inz-sample-queue'},
+        'worker.create_domain': {'queue': 'inz-smc-queue'},
+        'worker.create_contract_smc': {'queue': 'inz-smc-queue'},
     }
 
     PUBLIC_PATH = os.getenv('PUBLIC_PATH')
@@ -59,5 +60,5 @@ class Config:
 
     # Innovaz SMC
     INZ_MARKET_ADDRESS = os.getenv('INZ_MARKET_ADDRESS')
-    INZ_CAMPAIGN_FACTORY_ADDRESS = os.getenv('INZ_CAMPAIGN_FACTORY_ADDRESS')
+    INZ_FACTORY_ADDRESS = os.getenv('INZ_FACTORY_ADDRESS')
     INZ_COIN_TOKEN_ADDRESS = os.getenv('INZ_COIN_TOKEN_ADDRESS')

@@ -235,7 +235,6 @@ class SMCServices:
 
         return contract_id, _creation_result, _msg
 
-
     @classmethod
     def delete_contract(cls, user, contract_id):
         _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(contract_id)})

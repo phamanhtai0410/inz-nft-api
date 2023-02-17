@@ -33,7 +33,7 @@ Run:
 
 Celery worker:
 ```commandline
-   celery --app worker worker -Q inz-auth-queue -l INFO -c 4
+   celery --app worker worker -Q inz-smc-queue -l INFO -c 4
 ```
 
 
