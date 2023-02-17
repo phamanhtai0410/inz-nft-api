@@ -49,9 +49,9 @@ def create_contract_smc(contract_dict, contract_id, *args, **kwargs):
         "start_time": contract_dict["start_time"],
         "end_time": contract_dict["end_time"],
         "symbol": contract_dict["symbol"],
-        "market_address": Config.INZ_MARKET_ADDRESS,
-        "factory_address": Config.INZ_FACTORY_ADDRESS,
-        "token_address": Config.INZ_COIN_TOKEN_ADDRESS,
+        "market_address": Config.INZ_MARKET_ADDRESS[contract_dict['chain']],
+        "factory_address": Config.INZ_FACTORY_ADDRESS[contract_dict['chain']],
+        "token_address": Config.INZ_COIN_TOKEN_ADDRESS[contract_dict['chain']],
         "is_fixed_token": contract_dict["is_fixed_token"] if contract_dict["is_fixed_token"] else False,
         "name": contract_dict["name"]
     }

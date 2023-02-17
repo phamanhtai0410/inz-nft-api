@@ -59,6 +59,18 @@ class Config:
     INZ_IAPI_BASE_URL = os.getenv('INZ_IAPI_BASE_URL')
 
     # Innovaz SMC
-    INZ_MARKET_ADDRESS = os.getenv('INZ_MARKET_ADDRESS')
-    INZ_FACTORY_ADDRESS = os.getenv('INZ_FACTORY_ADDRESS')
-    INZ_COIN_TOKEN_ADDRESS = os.getenv('INZ_COIN_TOKEN_ADDRESS')
+    INZ_COIN_TOKEN_ADDRESS = {
+        'BSC': os.getenv('INZ_COIN_TOKEN_ADDRESS_BSC'),
+        'ETHEREUM': os.getenv('INZ_COIN_TOKEN_ADDRESS_ETH'),
+        'POLYGON': os.getenv('INZ_COIN_TOKEN_ADDRESS_POLYGON'),
+    }
+    INZ_MARKET_ADDRESS = {
+        'BSC': os.getenv('INZ_MARKET_ADDRESS_BSC'),
+        'ETHEREUM': os.getenv('INZ_MARKET_ADDRESS_ETH'),
+        'POLYGON': os.getenv('INZ_MARKET_ADDRESS_POLYGON'),
+    }
+    INZ_FACTORY_ADDRESS = {
+        'BSC': os.getenv('INZ_FACTORY_ADDRESS_BSC'),
+        'ETHEREUM': os.getenv('INZ_FACTORY_ADDRESS_ETH'),
+        'POLYGON': os.getenv('INZ_FACTORY_ADDRESS_POLYGON'),
+    }
