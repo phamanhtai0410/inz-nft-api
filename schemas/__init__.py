@@ -7,6 +7,6 @@
 from .nft import NFTSchema, NFTsResponseSchema, NFTsRequestSchema
 from .smc import SMCCreateContractResponseSchema, SMCCreateContractRequestSchema, \
     SMCUpdateNonReleasedContractRequestSchema, SMCUpdateNonReleasedContractResponseSchema, \
-    SMCUpdateReleasedContractRequestSchema, SMCUpdateReleasedContractResponseSchema
-
-
+    SMCUpdateReleasedContractRequestSchema, SMCUpdateReleasedContractResponseSchema, \
+    SMCImportContractRequestSchema, SMCImportContractResponseSchema, SMCReleaseContractRequestSchema,\
+    SMCReleaseContractResponseSchema, SMCDeleteContractRequestSchema, SMCDeleteContractResponseSchema

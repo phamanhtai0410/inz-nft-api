@@ -6,4 +6,4 @@
 """
 
 from .model import task_model
-from .smc import task_create_smc
+from .smc import create_domain, create_contract_smc
