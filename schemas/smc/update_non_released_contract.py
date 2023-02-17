@@ -45,10 +45,10 @@ class SMCUpdateNonReleasedContractRequestSchema(Schema):
     is_fixed_token = fields.Bool(required=True)
     nft_list = fields.List(fields.Nested(NFTOfContractSchema()))
     template_id = fields.String(required=False, allow_none=True, validate=IsObjectId())
-    standard = fields.String(required=False, allow_none=True, validate=validate.OneOf([
-        TokenStandard.ERC721,
-        TokenStandard.ERC1155
-    ]))
+    # standard = fields.String(required=False, allow_none=True, validate=validate.OneOf([
+    #     TokenStandard.ERC721,
+    #     TokenStandard.ERC1155
+    # ]))
 
 
 class SMCUpdateNonReleasedContractResponseSchema(Schema):

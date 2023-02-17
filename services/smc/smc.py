@@ -4,7 +4,7 @@ from bson import ObjectId
 from pydash import get
 
 from config import Config
-from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType
+from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard
 from lib.logger import debug
 from models import NFTContractsModel
 from services.dapp import INZDappServices
@@ -29,7 +29,11 @@ class SMCServices:
         if _result.status_code == 400:
             raise BadRequest(msg='Invalid params.', errors=get(_result.json(), 'errors'))
 
-        _list_nft = get(data, 'nft_list')
+        _list_nft = get(data, 'nft_list', [])
+        _standard = TokenStandard.ERC721
+
+        if _list_nft:
+            _standard = TokenStandard.ERC1155
 
         if get(data, 'is_box'):
             _sum_percent = sum([nft['percent'] if 'percent' in nft else 0 for nft in _list_nft])
@@ -55,6 +59,9 @@ class SMCServices:
         if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
             raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
+        if get(data, 'is_box'):
+            _standard = TokenStandard.ERC721
+
         debug("*** Contract dict : ", data)
         debug("*** Contract dict - nft list: ", _list_nft)
 
@@ -65,6 +72,7 @@ class SMCServices:
         NFTContractsModel.insert_one({
             'user_id': ObjectId(user),
             **data,
+            'standard': _standard,
             'type': ContractInsertType.CREATE,
             'is_deleted': False,
             'deleted_time': None,
@@ -82,7 +90,11 @@ class SMCServices:
         if _contract is None:
             raise BadRequest(msg='Invalid params.', errors=['Contract does not exist.'])
         # if 'nft_list' in data:
-        _list_nft = data['nft_list']
+        _list_nft = get(data, 'nft_list', [])
+        _standard = TokenStandard.ERC721
+
+        if _list_nft:
+            _standard = TokenStandard.ERC1155
 
         if _contract["is_deleted"]:
             raise BadRequest(msg="This contract's already been deleted!")
@@ -110,12 +122,16 @@ class SMCServices:
             data["nft_list"] = [{**x, 'index_type': get(x, 'index_type', idx + 1)} for idx, x in
                                 enumerate(data['nft_list'])]
 
+        if get(data, 'is_box'):
+            _standard = TokenStandard.ERC721
+
         NFTContractsModel.update_one(
             filter={
                 "_id": ObjectId(contract_id)
             },
             obj={
                 **data,
+                'standard': _standard,
                 'updated_by': 'inz-nft-api:services:SMCServices:update_non_released_contract'
             }
         )
@@ -228,7 +244,6 @@ class SMCServices:
             print('_contract_dict after encode: ', _contract, type(_contract))
 
             create_contract_smc.delay(
-                contract_dict=dict(_contract),
                 contract_id=contract_id
             )
 

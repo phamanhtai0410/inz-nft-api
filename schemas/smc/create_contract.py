@@ -44,10 +44,10 @@ class SMCCreateContractRequestSchema(Schema):
         Currency.USDT,
         Currency.ETH,
     ]))
-    standard = fields.String(required=True, validate=validate.OneOf([
-        TokenStandard.ERC721,
-        TokenStandard.ERC1155
-    ]))
+    # standard = fields.String(required=True, validate=validate.OneOf([
+    #     TokenStandard.ERC721,
+    #     TokenStandard.ERC1155
+    # ]))
     description = fields.List(fields.Nested(ContractDescriptionSchema()), allow_none=True, missing=[])
     about_owner = fields.Str(allow_none=True)
     owner_image_url = fields.Str(allow_none=True)

@@ -39,21 +39,13 @@ def create_domain(iapi_services, subdomain: str, contract_id: str):
 
 
 @worker.task(name="worker.create_campaign_smc", rate_limit="1000/s")
-def create_contract_smc(contract_dict, contract_id, *args, **kwargs):
+def create_contract_smc(contract_id, *args, **kwargs):
     """
         Call to Wallet-IAPI to create new contract
     """
     debug('worker - contract id : ', contract_id)
     _payload = {
-        "_id": contract_id,
-        "start_time": contract_dict["start_time"],
-        "end_time": contract_dict["end_time"],
-        "symbol": contract_dict["symbol"],
-        "market_address": Config.INZ_MARKET_ADDRESS[contract_dict['chain']],
-        "factory_address": Config.INZ_FACTORY_ADDRESS[contract_dict['chain']],
-        "token_address": Config.INZ_COIN_TOKEN_ADDRESS[contract_dict['chain']],
-        "is_fixed_token": contract_dict["is_fixed_token"] if contract_dict["is_fixed_token"] else False,
-        "name": contract_dict["name"]
+        "_id": contract_id
     }
 
     debug("worker : ", _payload)

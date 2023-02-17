@@ -52,4 +52,3 @@ class SMCImportContractResponseSchema(Schema):
 
     _id = fields.Str(required=True)
     result = fields.Bool(required=True)
-
