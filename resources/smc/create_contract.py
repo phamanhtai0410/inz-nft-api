@@ -4,6 +4,7 @@
         -
         -
 """
+from bson import ObjectId
 from flask_restful import Resource
 from pydash import get
 
@@ -20,6 +21,7 @@ class SMCCreateContractResource(Resource):
         login_required=True
     )
     def post(self, form_data, login_info):
+        form_data['template_id'] = ObjectId(form_data['template_id'])
         _name, _is_released = SMCServices.create_contract(
             user=str(get(login_info, 'user._id')),
             data={
