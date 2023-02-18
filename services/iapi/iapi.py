@@ -24,7 +24,7 @@ class IAPIServices:
             if contract_id:
                 _payload["campaign_id"] = contract_id
 
-            resp = self.client.post('/domain/check', json=_payload, verify=False, timeout=5)
+            resp = self.client.post('/domain/check', json=_payload, verify=True, timeout=5)
             debug(f'Call IAPI service check domain {subdomain}: {resp.status_code}  {resp.text}')
 
             return resp.status_code, resp.json()

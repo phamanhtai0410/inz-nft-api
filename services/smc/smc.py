@@ -7,6 +7,7 @@ from config import Config
 from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard
 from lib.logger import debug
 from models import NFTContractsModel
+from schemas import SMCImportContractRequestSchema
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
 from tasks import create_domain, create_contract_smc
@@ -186,11 +187,13 @@ class SMCServices:
             raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
         debug("*** Contract import : ", data)
-        _contract_id = NFTContractsModel.insert_one({
+        import_schema = SMCImportContractRequestSchema()
+        data = import_schema.dump(obj=data)
+
+        _contract_inserted = NFTContractsModel.insert_one({
             'user_id': ObjectId(user),
             **data,
             'max_allocation': None,
-            'nft_list': [],
             'is_released': True,
             'type': ContractInsertType.IMPORT,
             'is_deleted': False,
@@ -200,7 +203,7 @@ class SMCServices:
             'updated_by': ''
         })
 
-        return _contract_id, True
+        return get(_contract_inserted, '_id'), True
 
     @classmethod
     def release_contract(cls, user, contract_id):
@@ -270,7 +273,7 @@ class SMCServices:
                 'is_deleted': True,
                 'deleted_time': dt_utcnow(),
                 'updated_time': dt_utcnow(),
-                'updated_by': user
+                'updated_by': 'inz-nft-api:services:SMCServices:delete_contract'
             }
         )
         return True

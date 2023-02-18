@@ -20,7 +20,7 @@ class SMCImportContractResource(Resource):
         response=SMCImportContractResponseSchema(),
         login_required=True
     )
-    def put(self, form_data, login_info):
+    def post(self, form_data, login_info):
         _import_data = form_data
         _contract_address = get(form_data, 'contract')
         _import_data['template_id'] = ObjectId(form_data['template_id'])
