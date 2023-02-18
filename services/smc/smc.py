@@ -187,8 +187,6 @@ class SMCServices:
             raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
         debug("*** Contract import : ", data)
-        import_schema = SMCImportContractRequestSchema()
-        data = import_schema.dump(obj=data)
 
         _contract_inserted = NFTContractsModel.insert_one({
             'user_id': ObjectId(user),
