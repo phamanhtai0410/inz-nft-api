@@ -267,8 +267,10 @@ class SMCServices:
                 "_id": ObjectId(contract_id)
             },
             obj={
-                "is_deleted": True,
-                "deleted_time": dt_utcnow()
+                'is_deleted': True,
+                'deleted_time': dt_utcnow(),
+                'updated_time': dt_utcnow(),
+                'updated_by': user
             }
         )
         return True

@@ -21,13 +21,13 @@ class SMCDeleteContractResource(Resource):
     )
     def post(self, form_data, login_info):
         _contract_id = get(form_data, 'contract_id')
-        _id, _result = SMCServices.delete_contract(
+        _result = SMCServices.delete_contract(
             user=str(get(login_info, 'user._id')),
             contract_id=_contract_id
         )
 
         return {
-            "_id": _id,
+            "_id": _contract_id,
             "result": _result,
         }
 
