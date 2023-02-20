@@ -75,6 +75,7 @@ class SMCServices:
             **data,
             'standard': _standard,
             'type': ContractInsertType.CREATE,
+            'deploy_address': '',
             'is_deleted': False,
             'deleted_time': None,
             'deleted_by': '',
