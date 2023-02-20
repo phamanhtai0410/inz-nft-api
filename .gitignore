@@ -10,3 +10,4 @@ conf/keys
 /lib
 .DS_Store
 test.py
+/scripts
