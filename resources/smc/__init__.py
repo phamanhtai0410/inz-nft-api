@@ -10,8 +10,10 @@ from resources.smc.update_non_released_contract import SMCUpdateNonReleasedContr
 from resources.smc.update_released_contract import SMCUpdateReleasedContractResource
 from resources.smc.release_contract import SMCReleaseContractResource
 from resources.smc.delete_contract import SMCDeleteContractResource
+from resources.smc.contracts import ContractsResource
 
 smc_resources = {
+    '/list': ContractsResource,
     '/create': SMCCreateContractResource,
     '/import': SMCImportContractResource,
     '/release': SMCReleaseContractResource,

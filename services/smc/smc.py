@@ -291,5 +291,64 @@ class SMCServices:
         )
         return True
 
+    @classmethod
+    def get_contracts(
+            cls,
+            user: str,
+            page: int = 1,
+            page_size: int = 10
+    ):
+        _filter = {'user_id': ObjectId(user)}
 
+        _offset = page > 0 and (page - 1) * page_size or 0
 
+        _pipeline = [
+            {
+                '$match': _filter
+            },
+            {
+                '$lookup': {
+                    'from': 'templates',
+                    'localField': 'template_id',
+                    'foreignField': '_id',
+                    'as': 'template',
+                }
+            },
+            {
+                '$unwind': '$template'
+            },
+            {
+                '$lookup': {
+                    'from': 'template_categories',
+                    'localField': 'template.category_id',
+                    'foreignField': '_id',
+                    'as': 'category',
+                }
+            },
+            {
+                '$unwind': '$category'
+            },
+            {
+                '$skip': _offset
+            },
+            {
+                '$limit': page_size
+            }
+        ]
+
+        _items = NFTContractsModel.col.aggregate(pipeline=_pipeline)
+
+        _items = list(_items)
+
+        print(_items)
+
+        _num_of_page = (len(_items) / page_size)
+        if (len(_items) % page_size) > 0:
+            _num_of_page = _num_of_page + 1
+
+        return {
+            'items': _items,
+            'page': page,
+            'page_size': page_size,
+            'num_of_page': _num_of_page
+        }

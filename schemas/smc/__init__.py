@@ -11,3 +11,4 @@ from .update_released_contract import SMCUpdateReleasedContractRequestSchema, SM
 from .import_contract import SMCImportContractRequestSchema, SMCImportContractResponseSchema
 from .release_contract import SMCReleaseContractRequestSchema, SMCReleaseContractResponseSchema
 from .delete_contract import SMCDeleteContractRequestSchema, SMCDeleteContractResponseSchema
+from .contracts import ContractsRequestSchema, ContractsResponseSchema
