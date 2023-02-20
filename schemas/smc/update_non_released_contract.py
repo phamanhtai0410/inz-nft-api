@@ -26,10 +26,9 @@ class SMCUpdateNonReleasedContractRequestSchema(Schema):
         Chains.ETHEREUM
     ]))
     currency = fields.String(required=False, allow_none=True, validate=validate.OneOf([
-        Currency.BNB,
         Currency.BUSD,
         Currency.USDT,
-        Currency.ETH,
+        Currency.INZ,
     ]))
     total_supply = fields.Int(allow_none=True, validate=is_valid_number)
     total_raise = fields.Float(allow_none=True, validate=is_valid_number)

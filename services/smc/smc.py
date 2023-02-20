@@ -4,6 +4,7 @@ from bson import ObjectId
 from pydash import get
 
 from config import Config
+from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
 from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard
 from lib.logger import debug
 from models import NFTContractsModel
@@ -70,12 +71,18 @@ class SMCServices:
 
         debug("Contract dict have index_type 2: ", data)
 
+        _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
+            symbol=get(data, 'currency'),
+            chain=get(data, 'chain')
+        )
+
         NFTContractsModel.insert_one({
             'user_id': ObjectId(user),
             **data,
             'standard': _standard,
             'type': ContractInsertType.CREATE,
             'deploy_address': '',
+            'currency_address': _currency_address.lower(),
             'is_deleted': False,
             'deleted_time': None,
             'deleted_by': '',
@@ -127,12 +134,18 @@ class SMCServices:
         if get(data, 'is_box'):
             _standard = TokenStandard.ERC721
 
+        _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
+            symbol=get(data, 'currency'),
+            chain=get(data, 'chain')
+        )
+
         NFTContractsModel.update_one(
             filter={
                 "_id": ObjectId(contract_id)
             },
             obj={
                 **data,
+                'currency_address': _currency_address,
                 'standard': _standard,
                 'updated_by': 'inz-nft-api:services:SMCServices:update_non_released_contract'
             }
@@ -192,6 +205,7 @@ class SMCServices:
         _contract_inserted = NFTContractsModel.insert_one({
             'user_id': ObjectId(user),
             **data,
+            'currency_address': '',
             'max_allocation': None,
             'is_released': True,
             'type': ContractInsertType.IMPORT,

@@ -7,6 +7,7 @@
 
 
 class Currency:
+    INZ = 'INZ'
     USDT = 'USDT'
     ETH = 'ETH'
     BNB = 'BNB'

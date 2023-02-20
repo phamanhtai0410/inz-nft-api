@@ -39,10 +39,9 @@ class SMCCreateContractRequestSchema(Schema):
         Chains.ETHEREUM
     ]))
     currency = fields.String(required=True, validate=validate.OneOf([
-        Currency.BNB,
         Currency.BUSD,
         Currency.USDT,
-        Currency.ETH,
+        Currency.INZ,
     ]))
     # standard = fields.String(required=True, validate=validate.OneOf([
     #     TokenStandard.ERC721,
