@@ -38,7 +38,7 @@ def create_domain(iapi_services, subdomain: str, contract_id: str):
         return False
 
 
-@worker.task(name="worker.create_campaign_smc", rate_limit="1000/s")
+@worker.task(name="worker.create_contract_smc", rate_limit="1000/s")
 def create_contract_smc(contract_id, *args, **kwargs):
     """
         Call to Wallet-IAPI to create new contract
@@ -52,8 +52,9 @@ def create_contract_smc(contract_id, *args, **kwargs):
     resp = requests.post(
         f"{Config.WALLET_IAPI}/deploy/campaign",
         json=_payload,
-        verify=False,
         timeout=10
     )
+
+    debug("wallet iapi response: ", resp.json())
     return "success"
 

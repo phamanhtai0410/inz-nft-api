@@ -245,8 +245,8 @@ class SMCServices:
         print("*** Subdomain Creation Result : ", _creation_result)
 
         if _creation_result:
-            #       Call to CampaignFactory to deploy new contract contract
-            #       params: infors of contracts
+            #       Call to CampaignFactory to deploy new contract
+            #       params: info of contracts
             #       return: created contract's address
             print('_contract_dict : ', _contract, type(_contract))
             print('_contract_id : ', contract_id, type(contract_id))

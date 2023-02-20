@@ -23,7 +23,7 @@ class SMCReleaseContractResource(Resource):
         _contract_id = get(form_data, 'contract_id')
         _id, _result, _msg = SMCServices.release_contract(
             user=str(get(login_info, 'user._id')),
-            contract_id=_contract_id
+            contract_id=str(_contract_id)
         )
 
         return {
