@@ -38,6 +38,7 @@ class SMCServices:
             _standard = TokenStandard.ERC1155
 
         if get(data, 'is_box'):
+            _standard = TokenStandard.ERC721
             _sum_percent = sum([nft['percent'] if 'percent' in nft else 0 for nft in _list_nft])
             if _sum_percent != 100:
                 raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
@@ -60,9 +61,6 @@ class SMCServices:
 
         if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
             raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
-
-        if get(data, 'is_box'):
-            _standard = TokenStandard.ERC721
 
         debug("*** Contract dict : ", data)
         debug("*** Contract dict - nft list: ", _list_nft)
@@ -109,6 +107,7 @@ class SMCServices:
             raise BadRequest(msg="This contract's already been deleted!")
 
         if data["is_box"]:
+            _standard = TokenStandard.ERC721
             _sum_percent = sum([nft['percent'] for nft in _list_nft])
             if _sum_percent != 100:
                 raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
@@ -130,9 +129,6 @@ class SMCServices:
         if 'nft_list' in data:
             data["nft_list"] = [{**x, 'index_type': get(x, 'index_type', idx + 1)} for idx, x in
                                 enumerate(data['nft_list'])]
-
-        if get(data, 'is_box'):
-            _standard = TokenStandard.ERC721
 
         _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
             symbol=get(data, 'currency'),
