@@ -45,6 +45,7 @@ class SMCImportContractRequestSchema(Schema):
     is_box = fields.Bool(required=True)
     is_fixed_token = fields.Bool(required=False, default=False)
     nft_list = fields.List(fields.Nested(NFTOfContractSchema()), default=[])
+    price = fields.Float(required=True, validate=is_valid_number)
 
 
 class SMCImportContractResponseSchema(Schema):
