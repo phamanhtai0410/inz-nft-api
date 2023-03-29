@@ -11,13 +11,14 @@ class NFTOfContractSchema(Schema):
         unknown = INCLUDE
         ordered = True
 
-    name = fields.Str(required=True)
-    image_uri = fields.Str(required=True)
-    supply = fields.Int(required=True, validate=is_valid_number)
+    # name = fields.Str(required=True)
+    image_url = fields.Str(required=True)
+    supply = fields.Int(allow_none=True, validate=is_valid_number)
     price = fields.Float(allow_none=True, validate=is_valid_number)
-    type = fields.Str(required=True)
+    type = fields.Str(allow_none=True)
     percent = fields.Float(allow_none=True)
-    description = fields.Str(allow_none=True)
+    properties = fields.Dict(allow_none=True)
+    actions = fields.Dict(allow_none=True)
 
 
 class ContractDescriptionSchema(Schema):
@@ -32,38 +33,38 @@ class SMCCreateContractRequestSchema(Schema):
 
     name = fields.String(required=True)
     symbol = fields.String(required=True)
-    total_supply = fields.Integer(required=True, validate=is_valid_number)
-    total_raise = fields.Float(required=True, validate=is_valid_number)
-    chain = fields.String(required=True, validate=validate.OneOf([
+    # total_supply = fields.Integer(allow_none=True, validate=is_valid_number)
+    # total_raise = fields.Float(allow_none=True, validate=is_valid_number)
+    chain = fields.String(allow_none=True, validate=validate.OneOf([
         Chains.BSC,
         Chains.ETHEREUM
-    ]))
-    currency = fields.String(required=True, validate=validate.OneOf([
-        Currency.BUSD,
-        Currency.USDT,
-        Currency.INZ,
-    ]))
+    ]), missing=Chains.BSC)
+    # currency = fields.String(required=True, validate=validate.OneOf([
+    #     Currency.BUSD,
+    #     Currency.USDT,
+    #     Currency.INZ,
+    # ]))
     # standard = fields.String(required=True, validate=validate.OneOf([
     #     TokenStandard.ERC721,
     #     TokenStandard.ERC1155
     # ]))
-    description = fields.List(fields.Nested(ContractDescriptionSchema()), allow_none=True, missing=[])
-    about_owner = fields.Str(allow_none=True)
-    owner_image_url = fields.Str(allow_none=True)
+    # description = fields.List(fields.Nested(ContractDescriptionSchema()), allow_none=True, missing=[])
+    # about_owner = fields.Str(allow_none=True)
+    # owner_image_url = fields.Str(allow_none=True)
     image_url = fields.Str(required=True)
     template_id = fields.String(required=True, validate=IsObjectId())
     highlight_text = fields.Str(allow_none=True)
-    max_allocation = fields.Int(allow_none=True, validate=is_valid_number)
-    start_time = DatetimeField(required=True)
-    end_time = DatetimeField(required=True)
-    website_domain = fields.Str(required=True, validate=is_valid_subdomain)
-    social_link = fields.Dict(allow_none=True)
-    contract_method = fields.Int(required=True, validate=validate.OneOf([
-        ContractMethod.USER_WALLET,
-        ContractMethod.INZ_WALLET
-    ]))
-    is_box = fields.Bool(required=True)
-    is_fixed_token = fields.Bool(required=True)
+    # max_allocation = fields.Int(allow_none=True, validate=is_valid_number)
+    # start_time = DatetimeField(allow_none=True)
+    # end_time = DatetimeField(allow_none=True)
+    # website_domain = fields.Str(required=True, validate=is_valid_subdomain)
+    # social_link = fields.Dict(allow_none=True)
+    # contract_method = fields.Int(allow_none=True, validate=validate.OneOf([
+    #     ContractMethod.USER_WALLET,
+    #     ContractMethod.INZ_WALLET
+    # ]), missing=ContractMethod.USER_WALLET)
+    # is_box = fields.Bool(required=True)
+    # is_fixed_token = fields.Bool(required=True)
     nft_list = fields.List(fields.Nested(NFTOfContractSchema()), required=True)
 
 

@@ -4,11 +4,11 @@ from bson import ObjectId
 from pydash import get
 
 from config import Config
+from enums.order import Currency
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
-from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard
+from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard, Chains
 from lib.logger import debug
 from models import NFTContractsModel
-from schemas import SMCImportContractRequestSchema
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
 from tasks import create_domain, create_contract_smc
@@ -34,33 +34,34 @@ class SMCServices:
         _list_nft = get(data, 'nft_list', [])
         _standard = TokenStandard.ERC721
 
-        if _list_nft:
-            _standard = TokenStandard.ERC1155
+        # TODO: check token standard
+        # if _list_nft:
+        #     _standard = TokenStandard.ERC1155
 
-        if get(data, 'is_box'):
-            _standard = TokenStandard.ERC721
-            _sum_percent = sum([nft['percent'] if 'percent' in nft else 0 for nft in _list_nft])
-            if _sum_percent != 100:
-                raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
-        else:
-            _sum_supply = sum([nft['supply'] for nft in _list_nft])
-            _sum_raise = sum([nft['supply'] * nft['price'] for nft in _list_nft])
+        # if get(data, 'is_box'):
+        #     _standard = TokenStandard.ERC721
+        #     _sum_percent = sum([nft['percent'] if 'percent' in nft else 0 for nft in _list_nft])
+        #     if _sum_percent != 100:
+        #         raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
+        # else:
+        #     _sum_supply = sum([nft['supply'] for nft in _list_nft])
+        #     _sum_raise = sum([nft['supply'] * nft['price'] for nft in _list_nft])
+        #
+        #     if _sum_supply != get(data, 'total_supply'):
+        #         raise BadRequest(msg='Invalid Nft List.', errors=['Total supply not valid!'])
+        #
+        #     if _sum_raise != data["total_raise"]:
+        #         raise BadRequest(msg='Invalid Nft List', errors=['Total raise not valid!'])
 
-            if _sum_supply != get(data, 'total_supply'):
-                raise BadRequest(msg='Invalid Nft List.', errors=['Total supply not valid!'])
+        # NOTE: Check later when release
+        # _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
+        #     get(data, 'website_domain'))
 
-            if _sum_raise != data["total_raise"]:
-                raise BadRequest(msg='Invalid Nft List', errors=['Total raise not valid!'])
-
-        # Check if subdomain
-        _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
-            get(data, 'website_domain'))
-
-        if _check_domain_status_code != 200:
-            raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
-
-        if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
-            raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
+        # if _check_domain_status_code != 200:
+        #     raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
+        #
+        # if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
+        #     raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
         debug("*** Contract dict : ", data)
         debug("*** Contract dict - nft list: ", _list_nft)
@@ -69,10 +70,14 @@ class SMCServices:
 
         debug("Contract dict have index_type 2: ", data)
 
+        # Fixed currency for demo
         _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
-            symbol=get(data, 'currency'),
-            chain=get(data, 'chain')
+            symbol=Currency.USDT,
+            chain=Chains.BSC
         )
+
+        if not get(data, 'chain'):
+            data['chain'] = Chains.BSC
 
         NFTContractsModel.insert_one({
             'user_id': ObjectId(user),
