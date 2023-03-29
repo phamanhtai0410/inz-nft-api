@@ -220,8 +220,10 @@ class SMCServices:
         return get(_contract_inserted, '_id'), True
 
     @classmethod
-    def release_contract(cls, user, contract_id):
-        _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(contract_id)})
+    def release_contract(cls, user, data):
+        _contract_id = str(get(data, 'contract_id'))
+        _website_domain = get(data, 'website_domain')
+        _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(_contract_id)})
 
         if _contract is None:
             raise BadRequest(msg='Invalid params.', errors=['Contract does not exist.'])
@@ -235,13 +237,21 @@ class SMCServices:
         if _contract["is_deleted"]:
             raise BadRequest(msg="This contract's already been deleted!")
 
+        _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(_website_domain)
+
+        if _check_domain_status_code != 200:
+            raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
+
+        if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
+            raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
+
         #    Create subdomain for contract
         #       @params: subdomain need to be created
         #       @return: result of creation: True or False and created subdomain
         _creation_result, _msg = create_domain(
             iapi_services=_iapi_services,
-            contract_id=contract_id,
-            subdomain=_contract["website_domain"]
+            contract_id=_contract_id,
+            subdomain=_website_domain
         )
         print("*** Subdomain Creation Result : ", _creation_result)
 
@@ -250,7 +260,7 @@ class SMCServices:
             #       params: info of contracts
             #       return: created contract's address
             print('_contract_dict : ', _contract, type(_contract))
-            print('_contract_id : ', contract_id, type(contract_id))
+            print('_contract_id : ', _contract_id, type(_contract_id))
 
             for _key, _value in _contract.items():
                 if isinstance(_value, ObjectId):
@@ -261,10 +271,10 @@ class SMCServices:
             print('_contract_dict after encode: ', _contract, type(_contract))
 
             create_contract_smc.delay(
-                contract_id=contract_id
+                contract_id=_contract_id
             )
 
-        return contract_id, _creation_result, _msg
+        return _contract_id, _website_domain, _creation_result, _msg
 
     @classmethod
     def delete_contract(cls, user, contract_id):

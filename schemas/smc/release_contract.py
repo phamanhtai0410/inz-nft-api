@@ -9,6 +9,7 @@ class SMCReleaseContractRequestSchema(Schema):
         ordered = True
 
     contract_id = ObjectIdField(required=True)
+    website_domain = fields.Str(required=True)
 
 
 class SMCReleaseContractResponseSchema(Schema):
@@ -17,5 +18,6 @@ class SMCReleaseContractResponseSchema(Schema):
         ordered = True
 
     _id = fields.Str(required=True)
+    domain = fields.Str(required=True)
     result = fields.Bool(required=True)
     messages = fields.Str(required=True)
