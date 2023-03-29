@@ -1,9 +1,22 @@
 from marshmallow import Schema, EXCLUDE, fields, RAISE, validate, INCLUDE
 
-from enums.contract import ContractMethod
-from enums.order import Currency
-from helper.validator import is_valid_number, is_valid_subdomain
-from lib import Chains, TokenStandard, IsObjectId, DatetimeField
+# from enums.contract import ContractMethod
+# from enums.order import Currency
+from helper.validator import is_valid_number
+from lib import Chains, IsObjectId
+
+
+class MetadataPropertiesSchema(Schema):
+    value = fields.Str(allow_none=True)
+    trait_type = fields.Str(allow_none=True)
+    display_type = fields.Str(allow_none=True, validate=validate.OneOf([
+        'string', 'number', 'boost_percentage', 'boost_number', 'date'
+    ]))
+
+
+class MetadataActionsSchema(Schema):
+    value = fields.Str(allow_none=True)
+    action_type = fields.Str(allow_none=True)
 
 
 class NFTOfContractSchema(Schema):
@@ -17,14 +30,14 @@ class NFTOfContractSchema(Schema):
     price = fields.Float(allow_none=True, validate=is_valid_number)
     type = fields.Str(allow_none=True)
     percent = fields.Float(allow_none=True)
-    properties = fields.Dict(allow_none=True)
-    actions = fields.Dict(allow_none=True)
+    properties = fields.List(fields.Nested(MetadataPropertiesSchema()), allow_none=True, missing=[])
+    actions = fields.List(fields.Nested(MetadataActionsSchema()), allow_none=True, missing=[])
 
 
 class ContractDescriptionSchema(Schema):
     title = fields.Str(required=True)
     html_content = fields.Str(required=True)
-    image_uri = fields.Str(allow_none=True, missing='')
+    image_url = fields.Str(allow_none=True, missing='')
 
 
 class SMCCreateContractRequestSchema(Schema):
@@ -75,4 +88,3 @@ class SMCCreateContractResponseSchema(Schema):
 
     name = fields.Str(required=True)
     is_released = fields.Bool(required=True)
-
