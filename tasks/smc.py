@@ -2,16 +2,18 @@ import traceback
 
 import requests
 import sentry_sdk
+from bson import ObjectId
 
 from config import Config
 from lib import TaskStatus
 from lib.logger import debug
+from models import NFTContractsModel
 from worker import worker
 from connect import redis_cluster
 
 
 @worker.task(name='worker.create_domain', rate_limit='1000/s')
-def create_domain(iapi_services, subdomain: str, contract_id: str):
+def create_domain(subdomain: str, contract_id: str):
     debug('Worker: Create domain ----- Contract ID: ', contract_id)
 
     _create_domain_status_key = f'smc:_id:{contract_id}:create_domain:status'
@@ -22,11 +24,16 @@ def create_domain(iapi_services, subdomain: str, contract_id: str):
         #
         # if not _resp["data"]["result"]:
         #     return False, "Subdomain not valid!"
+        _payload = {
+            "domain": subdomain,
+            "campaign_id": contract_id
+        }
 
-        _code_create_new_domain, _resp_create_new_domain = iapi_services.create_new_subdomain(
-            subdomain=subdomain,
-            contract_id=contract_id
-        )
+        _resp = requests.post(f'{Config.INZ_IAPI_BASE_URL}/domain', json=_payload, verify=False, timeout=30)
+        _code_create_new_domain = _resp.status_code
+        _resp_create_new_domain = _resp.json()
+
+        debug(f'Call IAPI service create domain {subdomain}: {_resp.status_code}  {_resp.text}')
 
         if _code_create_new_domain != 200:
             redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
@@ -43,10 +50,19 @@ def create_domain(iapi_services, subdomain: str, contract_id: str):
             debug('Msg', _resp_create_new_domain['msg'])
             debug('-' * 20)
 
+        NFTContractsModel.update_one(
+            filter={
+                "_id": ObjectId(contract_id)
+            },
+            obj={
+                'website_domain': subdomain,
+                'updated_by': 'inz-nft-api:tasks:create_domain'
+            }
+        )
+
         redis_cluster.set(_create_domain_status_key, TaskStatus.DONE)
         debug('-' * 20)
-        debug("Create subdomain successfully!")
-        debug(_resp_create_new_domain['data']['result'])
+        debug("Create subdomain successfully!", _resp_create_new_domain['data']['result'])
         debug('-' * 20)
 
     except:

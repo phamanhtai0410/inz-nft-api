@@ -224,8 +224,8 @@ class SMCServices:
         if _contract is None:
             raise BadRequest(msg='Invalid params.', errors=['Contract does not exist.'])
 
-        if _contract['is_released']:
-            raise BadRequest(msg="This contract's already released!")
+        # if _contract['is_released']:
+        #     raise BadRequest(msg="This contract's already released!")
 
         if _contract['user_id'] != ObjectId(user):
             raise BadRequest(msg="Not have permissions to release this contract!")
@@ -233,22 +233,22 @@ class SMCServices:
         if _contract["is_deleted"]:
             raise BadRequest(msg="This contract's already been deleted!")
 
-        _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(_website_domain)
-
-        if _check_domain_status_code != 200:
-            raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
-
-        if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
-            raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
-
         _create_domain_status_key = f'smc:_id:{_contract_id}:create_domain:status'
         _create_domain_status = redis_cluster.get(_create_domain_status_key)
         _create_smc_status_key = f'smc:_id:{_contract_id}:create_smc:status'
         _create_smc_status = redis_cluster.get(_create_smc_status_key)
 
         if not _create_domain_status or _create_domain_status == TaskStatus.FAIL:
+            _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
+                _website_domain)
+
+            if _check_domain_status_code != 200:
+                raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
+
+            if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
+                raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
+
             create_domain.delay(
-                iapi_services=_iapi_services,
                 contract_id=_contract_id,
                 subdomain=_website_domain
             )
