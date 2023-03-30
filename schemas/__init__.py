@@ -10,4 +10,4 @@ from .smc import SMCCreateContractResponseSchema, SMCCreateContractRequestSchema
     SMCUpdateReleasedContractRequestSchema, SMCUpdateReleasedContractResponseSchema, \
     SMCImportContractRequestSchema, SMCImportContractResponseSchema, SMCReleaseContractRequestSchema,\
     SMCReleaseContractResponseSchema, SMCDeleteContractRequestSchema, SMCDeleteContractResponseSchema, \
-    ContractsRequestSchema, ContractsResponseSchema
+    ContractsRequestSchema, ContractsResponseSchema, SMCSignatureSchema, SMCSignatureResponseSchema
