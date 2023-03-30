@@ -52,6 +52,8 @@ class Config:
     CONFIRM_BLOCK = 1
     ASSETS = json.loads(os.getenv('ASSETS', '{}'))
 
+    AUTH_PRIVATE_KEY = os.getenv('AUTH_PRIVATE_KEY')
+
     #  Simplex config
     SIMPLEX_URI = os.getenv('SIMPLEX_URI')
 
@@ -75,3 +77,6 @@ class Config:
     #     'ETHEREUM': os.getenv('INZ_FACTORY_ADDRESS_ETH'),
     #     'POLYGON': os.getenv('INZ_FACTORY_ADDRESS_POLYGON'),
     # }
+
+    # Constants Config
+    SIGNATURE_EXPIRE_TIME = 60 * 60

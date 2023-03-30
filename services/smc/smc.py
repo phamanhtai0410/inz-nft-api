@@ -1,17 +1,16 @@
 from datetime import timezone, datetime
-
 from bson import ObjectId
 from pydash import get
-
 from config import Config
 from enums.order import Currency
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
-from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard, Chains
+from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard, Chains, TaskStatus
 from lib.logger import debug
 from models import NFTContractsModel
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
 from tasks import create_domain, create_contract_smc
+from connect import redis_cluster
 
 _inz_dapp_client = ClientAPI(host=Config.INZ_DAPP_BASE_URL)
 _inz_dapp_services = INZDappServices(client=_inz_dapp_client)
@@ -72,12 +71,9 @@ class SMCServices:
 
         # Fixed currency for demo
         _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
-            symbol=Currency.USDT,
-            chain=Chains.BSC
+            symbol=get(data, 'currency'),
+            chain=get(data, 'chain')
         )
-
-        if not get(data, 'chain'):
-            data['chain'] = Chains.BSC
 
         NFTContractsModel.insert_one({
             'user_id': ObjectId(user),
@@ -105,25 +101,25 @@ class SMCServices:
         _list_nft = get(data, 'nft_list', [])
         _standard = TokenStandard.ERC721
 
-        if _list_nft:
-            _standard = TokenStandard.ERC1155
+        # if _list_nft:
+        #     _standard = TokenStandard.ERC1155
 
         if _contract["is_deleted"]:
             raise BadRequest(msg="This contract's already been deleted!")
 
-        if data["is_box"]:
-            _standard = TokenStandard.ERC721
-            _sum_percent = sum([nft['percent'] for nft in _list_nft])
-            if _sum_percent != 100:
-                raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
-        else:
-            _sum_supply = sum([nft['supply'] for nft in _list_nft])
-            _sum_raise = sum([nft['supply'] * nft['price'] for nft in _list_nft])
-
-            if _sum_supply != data['total_supply']:
-                raise BadRequest(msg='Invalid Nft List.', errors=['Total supply not valid!'])
-            if _sum_raise != data["total_raise"]:
-                raise BadRequest(msg='Invalid Nft List.', errors=['Total raise not valid!'])
+        # if data["is_box"]:
+        #     _standard = TokenStandard.ERC721
+        #     _sum_percent = sum([nft['percent'] for nft in _list_nft])
+        #     if _sum_percent != 100:
+        #         raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
+        # else:
+        #     _sum_supply = sum([nft['supply'] for nft in _list_nft])
+        #     _sum_raise = sum([nft['supply'] * nft['price'] for nft in _list_nft])
+        #
+        #     if _sum_supply != data['total_supply']:
+        #         raise BadRequest(msg='Invalid Nft List.', errors=['Total supply not valid!'])
+        #     if _sum_raise != data["total_raise"]:
+        #         raise BadRequest(msg='Invalid Nft List.', errors=['Total raise not valid!'])
 
         if str(_contract['user_id']) != user:
             raise BadRequest(msg="Not have permission to update this contract!")
@@ -245,36 +241,36 @@ class SMCServices:
         if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
             raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
-        #    Create subdomain for contract
-        #       @params: subdomain need to be created
-        #       @return: result of creation: True or False and created subdomain
-        _creation_result, _msg = create_domain(
-            iapi_services=_iapi_services,
-            contract_id=_contract_id,
-            subdomain=_website_domain
-        )
-        print("*** Subdomain Creation Result : ", _creation_result)
+        _create_domain_status_key = f'smc:_id:{_contract_id}:create_domain:status'
+        _create_domain_status = redis_cluster.get(_create_domain_status_key)
+        _create_smc_status_key = f'smc:_id:{_contract_id}:create_smc:status'
+        _create_smc_status = redis_cluster.get(_create_smc_status_key)
 
-        if _creation_result:
-            #       Call to CampaignFactory to deploy new contract
-            #       params: info of contracts
-            #       return: created contract's address
-            print('_contract_dict : ', _contract, type(_contract))
-            print('_contract_id : ', _contract_id, type(_contract_id))
+        if not _create_domain_status or _create_domain_status == TaskStatus.FAIL:
+            create_domain.delay(
+                iapi_services=_iapi_services,
+                contract_id=_contract_id,
+                subdomain=_website_domain
+            )
+            redis_cluster.set(_create_domain_status_key, TaskStatus.PROCESSING)
+            _create_domain_status = TaskStatus.PROCESSING
 
+        if not _create_smc_status or _create_smc_status == TaskStatus.FAIL:
             for _key, _value in _contract.items():
                 if isinstance(_value, ObjectId):
                     _contract[_key] = str(_value)
                 if isinstance(_value, datetime):
                     _contract[_key] = _value.replace(tzinfo=timezone.utc).timestamp()
 
-            print('_contract_dict after encode: ', _contract, type(_contract))
+            debug('_contract_dict after encode: ', _contract, type(_contract))
 
             create_contract_smc.delay(
                 contract_id=_contract_id
             )
+            redis_cluster.set(_create_smc_status_key, TaskStatus.PROCESSING)
+            _create_smc_status = TaskStatus.PROCESSING
 
-        return _contract_id, _website_domain, _creation_result, _msg
+        return _contract_id, _website_domain, _create_domain_status, _create_smc_status
 
     @classmethod
     def delete_contract(cls, user, contract_id):

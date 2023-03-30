@@ -19,5 +19,5 @@ class SMCReleaseContractResponseSchema(Schema):
 
     _id = fields.Str(required=True)
     domain = fields.Str(required=True)
-    result = fields.Bool(required=True)
-    messages = fields.Str(required=True)
+    create_domain_status = fields.Str(required=True)
+    create_smc_status = fields.Str(required=True)

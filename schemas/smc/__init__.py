@@ -12,3 +12,4 @@ from .import_contract import SMCImportContractRequestSchema, SMCImportContractRe
 from .release_contract import SMCReleaseContractRequestSchema, SMCReleaseContractResponseSchema
 from .delete_contract import SMCDeleteContractRequestSchema, SMCDeleteContractResponseSchema
 from .contracts import ContractsRequestSchema, ContractsResponseSchema
+from .signature import SMCSignatureResponseSchema, SMCSignatureSchema

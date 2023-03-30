@@ -1,7 +1,7 @@
 from marshmallow import Schema, EXCLUDE, fields, RAISE, validate, INCLUDE
 
+from enums.order import Currency
 # from enums.contract import ContractMethod
-# from enums.order import Currency
 from helper.validator import is_valid_number
 from lib import Chains, IsObjectId
 
@@ -24,9 +24,9 @@ class NFTOfContractSchema(Schema):
         unknown = INCLUDE
         ordered = True
 
-    # name = fields.Str(required=True)
+    name = fields.Str(allow_none=True, missing='Unnamed')
     image_url = fields.Str(required=True)
-    supply = fields.Int(allow_none=True, validate=is_valid_number)
+    supply = fields.Int(allow_none=True, validate=is_valid_number, missing=0)
     price = fields.Float(allow_none=True, validate=is_valid_number)
     type = fields.Str(allow_none=True)
     percent = fields.Float(allow_none=True)
@@ -48,15 +48,15 @@ class SMCCreateContractRequestSchema(Schema):
     symbol = fields.String(required=True)
     # total_supply = fields.Integer(allow_none=True, validate=is_valid_number)
     # total_raise = fields.Float(allow_none=True, validate=is_valid_number)
-    chain = fields.String(allow_none=True, validate=validate.OneOf([
+    chain = fields.String(required=True, validate=validate.OneOf([
         Chains.BSC,
         Chains.ETHEREUM
-    ]), missing=Chains.BSC)
-    # currency = fields.String(required=True, validate=validate.OneOf([
-    #     Currency.BUSD,
-    #     Currency.USDT,
-    #     Currency.INZ,
-    # ]))
+    ]))
+    currency = fields.String(required=True, validate=validate.OneOf([
+        Currency.BUSD,
+        Currency.USDT,
+        Currency.INZ,
+    ]))
     # standard = fields.String(required=True, validate=validate.OneOf([
     #     TokenStandard.ERC721,
     #     TokenStandard.ERC1155
