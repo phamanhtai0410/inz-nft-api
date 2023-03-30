@@ -24,12 +24,12 @@ class NFTOfContractSchema(Schema):
         unknown = INCLUDE
         ordered = True
 
-    name = fields.Str(allow_none=True, missing='Unnamed')
+    name = fields.Str(required=True)
     image_url = fields.Str(required=True)
     description = fields.Str(allow_none=True)
     supply = fields.Int(allow_none=True, validate=is_valid_number, missing=0)
     price = fields.Float(allow_none=True, validate=is_valid_number)
-    type = fields.Str(allow_none=True)
+    type = fields.Str(required=True)
     percent = fields.Float(allow_none=True)
     properties = fields.List(fields.Nested(MetadataPropertiesSchema()), allow_none=True, missing=[])
     actions = fields.List(fields.Nested(MetadataActionsSchema()), allow_none=True, missing=[])
