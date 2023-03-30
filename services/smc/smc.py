@@ -71,12 +71,9 @@ class SMCServices:
 
         # Fixed currency for demo
         _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
-            symbol=Currency.USDT,
-            chain=Chains.BSC
+            symbol=get(data, 'currency'),
+            chain=get(data, 'chain')
         )
-
-        if not get(data, 'chain'):
-            data['chain'] = Chains.BSC
 
         NFTContractsModel.insert_one({
             'user_id': ObjectId(user),
@@ -104,25 +101,25 @@ class SMCServices:
         _list_nft = get(data, 'nft_list', [])
         _standard = TokenStandard.ERC721
 
-        if _list_nft:
-            _standard = TokenStandard.ERC1155
+        # if _list_nft:
+        #     _standard = TokenStandard.ERC1155
 
         if _contract["is_deleted"]:
             raise BadRequest(msg="This contract's already been deleted!")
 
-        if data["is_box"]:
-            _standard = TokenStandard.ERC721
-            _sum_percent = sum([nft['percent'] for nft in _list_nft])
-            if _sum_percent != 100:
-                raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
-        else:
-            _sum_supply = sum([nft['supply'] for nft in _list_nft])
-            _sum_raise = sum([nft['supply'] * nft['price'] for nft in _list_nft])
-
-            if _sum_supply != data['total_supply']:
-                raise BadRequest(msg='Invalid Nft List.', errors=['Total supply not valid!'])
-            if _sum_raise != data["total_raise"]:
-                raise BadRequest(msg='Invalid Nft List.', errors=['Total raise not valid!'])
+        # if data["is_box"]:
+        #     _standard = TokenStandard.ERC721
+        #     _sum_percent = sum([nft['percent'] for nft in _list_nft])
+        #     if _sum_percent != 100:
+        #         raise BadRequest(msg='Invalid Nft List.', errors=['Total percent not valid!'])
+        # else:
+        #     _sum_supply = sum([nft['supply'] for nft in _list_nft])
+        #     _sum_raise = sum([nft['supply'] * nft['price'] for nft in _list_nft])
+        #
+        #     if _sum_supply != data['total_supply']:
+        #         raise BadRequest(msg='Invalid Nft List.', errors=['Total supply not valid!'])
+        #     if _sum_raise != data["total_raise"]:
+        #         raise BadRequest(msg='Invalid Nft List.', errors=['Total raise not valid!'])
 
         if str(_contract['user_id']) != user:
             raise BadRequest(msg="Not have permission to update this contract!")
