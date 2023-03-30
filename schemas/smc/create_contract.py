@@ -26,6 +26,7 @@ class NFTOfContractSchema(Schema):
 
     name = fields.Str(allow_none=True, missing='Unnamed')
     image_url = fields.Str(required=True)
+    description = fields.Str(allow_none=True)
     supply = fields.Int(allow_none=True, validate=is_valid_number, missing=0)
     price = fields.Float(allow_none=True, validate=is_valid_number)
     type = fields.Str(allow_none=True)
