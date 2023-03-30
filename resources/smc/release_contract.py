@@ -20,15 +20,14 @@ class SMCReleaseContractResource(Resource):
         login_required=True
     )
     def post(self, form_data, login_info):
-        _id, _domain, _result, _msg = SMCServices.release_contract(
+        _id, _domain, _create_domain_status, _create_smc_status = SMCServices.release_contract(
             user=str(get(login_info, 'user._id')),
             data=form_data
         )
 
         return {
-            "_id": _id,
-            "domain": _domain,
-            "result": _result,
-            "messages": _msg
+            '_id': _id,
+            'domain': _domain,
+            'create_domain_status': _create_domain_status,
+            'create_smc_status': _create_smc_status
         }
-
