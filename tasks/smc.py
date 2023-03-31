@@ -16,7 +16,7 @@ from connect import redis_cluster
 
 @worker.task(name='worker.create_domain', rate_limit='1000/s')
 def create_domain(user: str, subdomain: str, contract_id: str, template_id: str):
-    debug('Worker: Create domain ----- Contract ID: ', contract_id)
+    debug(f'Worker: Create domain ----- Contract ID: {contract_id}')
 
     _create_domain_status_key = f'smc:template_id:{template_id}:create_domain:status'
     try:
@@ -41,12 +41,14 @@ def create_domain(user: str, subdomain: str, contract_id: str, template_id: str)
             redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
             debug(f"Contract ID: {contract_id} ----- Create subdomain failed!")
             debug(f'Code {_code_create_new_domain}')
+            return 'FAIL'
 
         if _resp_create_new_domain['data'] == {}:
             redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
             debug(f"Contract ID: {contract_id} ----- Create subdomain failed!")
             debug(f'Code {_resp_create_new_domain["error_code"]}')
             debug(f'Msg {_resp_create_new_domain["msg"]}')
+            return 'FAIL'
 
         UsersTemplatesModel.update_one(
             filter={
@@ -61,17 +63,19 @@ def create_domain(user: str, subdomain: str, contract_id: str, template_id: str)
 
         redis_cluster.set(_create_domain_status_key, TaskStatus.DONE)
         debug(f"Create subdomain successfully! {_resp_create_new_domain['data']['result']}")
+        return 'DONE'
 
     except:
         sentry_sdk.capture_exception()
         traceback.print_exc()
         redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
         debug(f"Contract ID: {contract_id} ----- Create subdomain failed with exception!")
+        return 'FAIL'
 
 
 @worker.task(name="worker.create_contract_smc", rate_limit="1000/s")
 def create_contract_smc(contract_id, *args, **kwargs):
-    debug('Worker: Create SMC ----- Contract ID: ', contract_id)
+    debug(f'Worker: Create SMC ----- Contract ID: {contract_id}')
 
     _create_smc_status_key = f'smc:_id:{contract_id}:create_smc:status'
     try:
@@ -89,14 +93,17 @@ def create_contract_smc(contract_id, *args, **kwargs):
             redis_cluster.set(_create_smc_status_key, TaskStatus.FAIL)
             debug(f"Contract ID: {contract_id} ----- Create smc failed!")
             debug(f'Code {res.status_code}')
+            return 'FAIL'
 
         debug(f"Contract ID: {contract_id} ----- Create smc success!")
+        return 'DONE'
 
     except:
         sentry_sdk.capture_exception()
         traceback.print_exc()
         redis_cluster.set(_create_smc_status_key, TaskStatus.FAIL)
         debug(f"Contract ID: {contract_id} ----- Create contract failed with exception!")
+        return 'FAIL'
 
 
 @worker.task(name="worker.insert_new_contract", rate_limit="1000/s")
@@ -144,8 +151,10 @@ def insert_new_contract(data: dict, user: str, standard: str):
         )
 
         debug(f"User ID: {user} ----- Template ID: {_template_id} ----- Insert user contract success")
+        return 'DONE'
 
     except:
         sentry_sdk.capture_exception()
         traceback.print_exc()
         debug(f"User ID: {user} ----- Template ID: {_template_id} ----- Insert user contract failed with exception!")
+        return 'FAIL'

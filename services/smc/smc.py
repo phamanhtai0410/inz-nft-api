@@ -3,12 +3,13 @@ from bson import ObjectId
 from pydash import get
 from config import Config
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
+from helper.user.user_template import UserTemplateHelpers
 from lib import ClientAPI, BadRequest, dt_utcnow, TokenStandard, TaskStatus
 from lib.logger import debug
 from models import NFTContractsModel, UsersTemplatesModel
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
-from tasks import create_domain, create_contract_smc, insert_new_contract
+from tasks import create_domain, create_contract_smc, insert_new_contract, send_task_import_contract
 from connect import redis_cluster
 
 _inz_dapp_client = ClientAPI(host=Config.INZ_DAPP_BASE_URL)
@@ -165,31 +166,20 @@ class SMCServices:
 
     @classmethod
     def import_contract(cls, user, data, contract_address):
-        _contract = NFTContractsModel.find_one(filter={
-            'contract': contract_address,
-            'chain': get(data, 'chain'),
-            'user_id': ObjectId(user)
-        })
-        if _contract is not None:
-            raise BadRequest(msg='Invalid params.', errors=['Contract is exist.'])
-
-        # Check if subdomain
-        _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
-            get(data, 'website_domain'))
-
-        if _check_domain_status_code != 200:
-            raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
-
-        if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
-            raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
+        _template_id = get(data, 'template_id')
+        _is_exist = UserTemplateHelpers.is_use_template_with_contract(
+            user=user,
+            contract_address=contract_address,
+            template_id=_template_id
+        )
+        if _is_exist:
+            raise BadRequest(msg="Contract is already used with this template.")
 
         debug("*** Contract import : ", data)
 
         _contract_inserted = NFTContractsModel.insert_one({
-            'user_id': ObjectId(user),
             **data,
             'currency_address': '',
-            'max_allocation': None,
             'is_released': True,
             # 'type': ContractInsertType.IMPORT,
             'is_deleted': False,
@@ -198,6 +188,7 @@ class SMCServices:
             'created_by': 'inz-nft-api:services:SMCServices:import_contract',
             'updated_by': ''
         })
+        send_task_import_contract.delay({'chain': get(data, 'chain'), 'address': get(data, 'address')})
 
         return get(_contract_inserted, '_id'), True
 
