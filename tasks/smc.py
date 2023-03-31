@@ -9,7 +9,7 @@ from config import Config
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
 from lib import TaskStatus
 from lib.logger import debug
-from models import NFTContractsModel, UsersContractsModel
+from models import NFTContractsModel, UsersContractsModel, UsersTemplatesModel
 from worker import worker
 from connect import redis_cluster
 
@@ -127,15 +127,22 @@ def insert_new_contract(data: dict, user: str, standard: str):
         })
 
         # TODO: Limit contracts user can create
-        UsersContractsModel.insert_one({
-            'user_id': ObjectId(user),
-            'template_id': ObjectId(_template_id),
-            'contract_id': get(_contract_inserted, '_id'),
-            'website_domain': '',
-            'is_active': False,
-            'created_by': 'inz-nft-api:tasks:insert_new_contract',
-            'updated_by': ''
-        })
+        _user_templates = UsersTemplatesModel.find_one(
+            filter={
+                'user_id': ObjectId(user),
+                'template_id': ObjectId(_template_id),
+            }
+        )
+        _user_contracts = get(_user_templates, 'contracts', [])
+        _user_contracts.append(str(get(_contract_inserted, '_id')))
+
+        UsersTemplatesModel.update_one(
+            filter={'_id': ObjectId(get(_user_templates, '_id'))},
+            obj={
+                'contracts': _user_contracts,
+                'updated_by': 'inz-nft-api:tasks:insert_new_contract'
+            }
+        )
 
         debug(f"User ID: {user} ----- Template ID: {_template_id} ----- Insert user contract success")
 
