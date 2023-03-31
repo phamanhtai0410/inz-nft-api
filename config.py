@@ -34,6 +34,7 @@ class Config:
     CELERY_ROUTES = {
         'worker.create_domain': {'queue': 'inz-smc-queue'},
         'worker.create_contract_smc': {'queue': 'inz-smc-queue'},
+        'worker.insert_new_contract': {'queue': 'inz-smc-queue'},
     }
 
     PUBLIC_PATH = os.getenv('PUBLIC_PATH')

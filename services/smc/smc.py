@@ -2,14 +2,13 @@ from datetime import timezone, datetime
 from bson import ObjectId
 from pydash import get
 from config import Config
-from enums.order import Currency
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
-from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard, Chains, TaskStatus
+from lib import ClientAPI, BadRequest, dt_utcnow, TokenStandard, TaskStatus
 from lib.logger import debug
 from models import NFTContractsModel
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
-from tasks import create_domain, create_contract_smc
+from tasks import create_domain, create_contract_smc, insert_new_contract
 from connect import redis_cluster
 
 _inz_dapp_client = ClientAPI(host=Config.INZ_DAPP_BASE_URL)
@@ -69,25 +68,12 @@ class SMCServices:
 
         debug("Contract dict have index_type 2: ", data)
 
-        # Fixed currency for demo
-        _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
-            symbol=get(data, 'currency'),
-            chain=get(data, 'chain')
+        # insert nft_contracts, users_contracts
+        insert_new_contract.delay(
+            data=data,
+            user=user,
+            standard=_standard
         )
-
-        NFTContractsModel.insert_one({
-            'user_id': ObjectId(user),
-            **data,
-            'standard': _standard,
-            'type': ContractInsertType.CREATE,
-            'deploy_address': '',
-            'currency_address': _currency_address.lower(),
-            'is_deleted': False,
-            'deleted_time': None,
-            'deleted_by': '',
-            'created_by': 'inz-nft-api:services:SMCServices:create_contract',
-            'updated_by': ''
-        })
 
         return get(data, 'name'), get(data, 'is_released')
 
@@ -205,7 +191,7 @@ class SMCServices:
             'currency_address': '',
             'max_allocation': None,
             'is_released': True,
-            'type': ContractInsertType.IMPORT,
+            # 'type': ContractInsertType.IMPORT,
             'is_deleted': False,
             'deleted_time': None,
             'deleted_by': '',

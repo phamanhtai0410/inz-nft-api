@@ -3,11 +3,13 @@ import traceback
 import requests
 import sentry_sdk
 from bson import ObjectId
+from pydash import get
 
 from config import Config
+from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
 from lib import TaskStatus
 from lib.logger import debug
-from models import NFTContractsModel
+from models import NFTContractsModel, UsersContractsModel
 from worker import worker
 from connect import redis_cluster
 
@@ -37,18 +39,14 @@ def create_domain(subdomain: str, contract_id: str):
 
         if _code_create_new_domain != 200:
             redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
-            debug('-' * 20)
             debug(f"Contract ID: {contract_id} ----- Create subdomain failed!")
-            debug('Code', _code_create_new_domain)
-            debug('-' * 20)
+            debug(f'Code {_code_create_new_domain}')
 
         if _resp_create_new_domain['data'] == {}:
             redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
-            debug('-' * 20)
             debug(f"Contract ID: {contract_id} ----- Create subdomain failed!")
-            debug('Code', _resp_create_new_domain['error_code'])
-            debug('Msg', _resp_create_new_domain['msg'])
-            debug('-' * 20)
+            debug(f'Code {_resp_create_new_domain["error_code"]}')
+            debug(f'Msg {_resp_create_new_domain["msg"]}')
 
         NFTContractsModel.update_one(
             filter={
@@ -61,17 +59,13 @@ def create_domain(subdomain: str, contract_id: str):
         )
 
         redis_cluster.set(_create_domain_status_key, TaskStatus.DONE)
-        debug('-' * 20)
-        debug("Create subdomain successfully!", _resp_create_new_domain['data']['result'])
-        debug('-' * 20)
+        debug(f"Create subdomain successfully! {_resp_create_new_domain['data']['result']}")
 
     except:
         sentry_sdk.capture_exception()
         traceback.print_exc()
         redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
-        debug('-' * 20)
         debug(f"Contract ID: {contract_id} ----- Create subdomain failed with exception!")
-        debug('-' * 20)
 
 
 @worker.task(name="worker.create_contract_smc", rate_limit="1000/s")
@@ -92,15 +86,58 @@ def create_contract_smc(contract_id, *args, **kwargs):
 
         if res.status_code != 200:
             redis_cluster.set(_create_smc_status_key, TaskStatus.FAIL)
-            debug('-' * 20)
             debug(f"Contract ID: {contract_id} ----- Create smc failed!")
-            debug('Code', res.status_code)
-            debug('-' * 20)
+            debug(f'Code {res.status_code}')
+
+        debug(f"Contract ID: {contract_id} ----- Create smc success!")
 
     except:
         sentry_sdk.capture_exception()
         traceback.print_exc()
         redis_cluster.set(_create_smc_status_key, TaskStatus.FAIL)
-        debug('-' * 20)
         debug(f"Contract ID: {contract_id} ----- Create contract failed with exception!")
-        debug('-' * 20)
+
+
+@worker.task(name="worker.insert_new_contract", rate_limit="1000/s")
+def insert_new_contract(data: dict, user: str, standard: str):
+    _template_id = get(data, 'template_id')
+    debug(f'Worker: Insert New SMC ----- User ID: {user} ----- Template ID: {_template_id}')
+    try:
+        # Fixed currency for demo
+        _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
+            symbol=get(data, 'currency'),
+            chain=get(data, 'chain')
+        )
+
+        del data['template_id']
+
+        _contract_inserted = NFTContractsModel.insert_one({
+            **data,
+            'standard': standard,
+            # 'type': ContractInsertType.CREATE,
+            'deploy_address': '',
+            'currency_address': _currency_address.lower(),
+            'is_deleted': False,
+            'deleted_time': None,
+            'deleted_by': '',
+            'created_by': 'inz-nft-api:tasks:insert_new_contract',
+            'updated_by': ''
+        })
+
+        # TODO: Limit contracts user can create
+        UsersContractsModel.insert_one({
+            'user_id': ObjectId(user),
+            'template_id': ObjectId(_template_id),
+            'contract_id': get(_contract_inserted, '_id'),
+            'website_domain': '',
+            'is_active': False,
+            'created_by': 'inz-nft-api:tasks:insert_new_contract',
+            'updated_by': ''
+        })
+
+        debug(f"User ID: {user} ----- Template ID: {_template_id} ----- Insert user contract success")
+
+    except:
+        sentry_sdk.capture_exception()
+        traceback.print_exc()
+        debug(f"User ID: {user} ----- Template ID: {_template_id} ----- Insert user contract failed with exception!")
