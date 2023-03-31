@@ -205,7 +205,7 @@ class SMCServices:
     def release_contract(cls, user, data):
         _contract_id = str(get(data, 'contract_id'))
         _website_domain = get(data, 'website_domain')
-        _template_id = get(data, 'template_id')
+        _template_id = str(get(data, 'template_id'))
         _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(_contract_id)})
         _user_template = UsersTemplatesModel.find_one(filter={
             'user_id': ObjectId(user),
@@ -259,7 +259,7 @@ class SMCServices:
                     if isinstance(_value, datetime):
                         _contract[_key] = _value.replace(tzinfo=timezone.utc).timestamp()
 
-                debug('_contract_dict after encode: ', _contract, type(_contract))
+                debug(f'_contract_dict after encode: {_contract} ----- type: {type(_contract)}')
 
                 create_contract_smc.delay(
                     contract_id=_contract_id
