@@ -5,7 +5,7 @@ from config import Config
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
 from lib import ClientAPI, BadRequest, dt_utcnow, TokenStandard, TaskStatus
 from lib.logger import debug
-from models import NFTContractsModel, UsersContractsModel
+from models import NFTContractsModel, UsersTemplatesModel
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
 from tasks import create_domain, create_contract_smc, insert_new_contract
@@ -207,15 +207,16 @@ class SMCServices:
         _website_domain = get(data, 'website_domain')
         _template_id = get(data, 'template_id')
         _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(_contract_id)})
-        _user_contract = UsersContractsModel.find_one(filter={
-            'contract_id': ObjectId(_contract_id),
+        _user_template = UsersTemplatesModel.find_one(filter={
+            'user_id': ObjectId(user),
             'template_id': ObjectId(_template_id),
         })
+        _user_contracts = get(_user_template, 'contracts', [])
 
         if _contract is None:
             raise BadRequest(msg='Invalid params.', errors=['Collection does not exist.'])
 
-        if get(_user_contract, 'user_id') != ObjectId(user):
+        if _contract_id not in _user_contracts:
             raise BadRequest(msg="Not have permissions to release this contract!")
 
         if get(_contract, 'is_deleted'):
@@ -225,8 +226,8 @@ class SMCServices:
         _is_import = get(_contract, 'contract', '') != ''
 
         _create_domain_status = TaskStatus.DONE
-        if get(_user_contract, 'website_domain'):
-            _create_domain_status_key = f'smc:_id:{_contract_id}:create_domain:status'
+        if not get(_user_template, 'website_domain'):
+            _create_domain_status_key = f'smc:template_id:{_template_id}:create_domain:status'
             _create_domain_status = redis_cluster.get(_create_domain_status_key)
             if not _create_domain_status or _create_domain_status == TaskStatus.FAIL:
                 _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
@@ -239,8 +240,10 @@ class SMCServices:
                     raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
                 create_domain.delay(
+                    user=user,
+                    subdomain=_website_domain,
                     contract_id=_contract_id,
-                    subdomain=_website_domain
+                    template_id=_template_id
                 )
                 redis_cluster.set(_create_domain_status_key, TaskStatus.PROCESSING)
                 _create_domain_status = TaskStatus.PROCESSING

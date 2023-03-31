@@ -9,16 +9,16 @@ from config import Config
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
 from lib import TaskStatus
 from lib.logger import debug
-from models import NFTContractsModel, UsersContractsModel, UsersTemplatesModel
+from models import NFTContractsModel, UsersTemplatesModel
 from worker import worker
 from connect import redis_cluster
 
 
 @worker.task(name='worker.create_domain', rate_limit='1000/s')
-def create_domain(subdomain: str, contract_id: str, template_id: str):
+def create_domain(user: str, subdomain: str, contract_id: str, template_id: str):
     debug('Worker: Create domain ----- Contract ID: ', contract_id)
 
-    _create_domain_status_key = f'smc:_id:{contract_id}:create_domain:status'
+    _create_domain_status_key = f'smc:template_id:{template_id}:create_domain:status'
     try:
         # _status_code, _resp = iapi_services.check_campaign_subdomain_valid(subdomain=subdomain)
         # if _status_code != 200:
@@ -48,14 +48,13 @@ def create_domain(subdomain: str, contract_id: str, template_id: str):
             debug(f'Code {_resp_create_new_domain["error_code"]}')
             debug(f'Msg {_resp_create_new_domain["msg"]}')
 
-        UsersContractsModel.update_one(
+        UsersTemplatesModel.update_one(
             filter={
-                "contract_id": ObjectId(contract_id),
+                "user_id": ObjectId(user),
                 "template_id": ObjectId(template_id),
             },
             obj={
                 'website_domain': subdomain,
-                'is_active': True,
                 'updated_by': 'inz-nft-api:tasks:create_domain'
             }
         )
@@ -127,17 +126,17 @@ def insert_new_contract(data: dict, user: str, standard: str):
         })
 
         # TODO: Limit contracts user can create
-        _user_templates = UsersTemplatesModel.find_one(
+        _user_template = UsersTemplatesModel.find_one(
             filter={
                 'user_id': ObjectId(user),
                 'template_id': ObjectId(_template_id),
             }
         )
-        _user_contracts = get(_user_templates, 'contracts', [])
+        _user_contracts = get(_user_template, 'contracts', [])
         _user_contracts.append(str(get(_contract_inserted, '_id')))
 
         UsersTemplatesModel.update_one(
-            filter={'_id': ObjectId(get(_user_templates, '_id'))},
+            filter={'_id': ObjectId(get(_user_template, '_id'))},
             obj={
                 'contracts': _user_contracts,
                 'updated_by': 'inz-nft-api:tasks:insert_new_contract'
