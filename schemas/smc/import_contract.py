@@ -11,41 +11,26 @@ class SMCImportContractRequestSchema(Schema):
         unknown = RAISE
 
     contract = fields.String(required=True)
-    name = fields.String(required=True)
-    symbol = fields.String(required=True)
-    total_supply = fields.Integer(required=True, validate=is_valid_number)
-    total_raise = fields.Float(required=True, validate=is_valid_number)
+    name = fields.String(allow_none=True)
+    symbol = fields.String(allow_none=True)
     chain = fields.String(required=True, validate=validate.OneOf([
         Chains.BSC,
         Chains.ETHEREUM
     ]))
-    currency = fields.String(required=True, validate=validate.OneOf([
-        Currency.BUSD,
-        Currency.USDT,
-        Currency.INZ,
-    ]))
-    standard = fields.String(required=True, validate=validate.OneOf([
-        TokenStandard.ERC721,
-        TokenStandard.ERC1155
-    ]))
-    description = fields.List(fields.Nested(ContractDescriptionSchema()), allow_none=True, default=[])
-    about_owner = fields.Str(allow_none=True, default='')
-    owner_image_url = fields.Str(allow_none=True, default='')
-    image_url = fields.Str(required=True)
+    # currency = fields.String(required=True, validate=validate.OneOf([
+    #     Currency.BUSD,
+    #     Currency.USDT,
+    #     Currency.INZ,
+    # ]))
+    # standard = fields.String(required=True, validate=validate.OneOf([
+    #     TokenStandard.ERC721,
+    #     TokenStandard.ERC1155
+    # ]))
+    image_url = fields.Str(allow_none=True)
     template_id = fields.String(required=True, validate=IsObjectId())
     highlight_text = fields.Str(allow_none=True, default='')
-    start_time = DatetimeField(required=True)
-    end_time = DatetimeField(required=True)
-    website_domain = fields.Str(required=True, validate=is_valid_subdomain)
-    social_link = fields.Dict(allow_none=True, default={})
-    contract_method = fields.Int(required=True, validate=validate.OneOf([
-        ContractMethod.USER_WALLET,
-        ContractMethod.INZ_WALLET
-    ]))
-    is_box = fields.Bool(required=True)
-    is_fixed_token = fields.Bool(required=False, default=False)
-    nft_list = fields.List(fields.Nested(NFTOfContractSchema()), default=[])
-    price = fields.Float(required=True, validate=is_valid_number)
+    # social_link = fields.Dict(allow_none=True, default={})
+    # nft_list = fields.List(fields.Nested(NFTOfContractSchema()), default=[])
 
 
 class SMCImportContractResponseSchema(Schema):
