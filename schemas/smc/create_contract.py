@@ -3,7 +3,7 @@ from marshmallow import Schema, EXCLUDE, fields, RAISE, validate, INCLUDE
 from enums.order import Currency
 # from enums.contract import ContractMethod
 from helper.validator import is_valid_number
-from lib import Chains, IsObjectId
+from lib import Chains, IsObjectId, NotBlank
 
 
 class MetadataPropertiesSchema(Schema):
@@ -24,20 +24,20 @@ class NFTOfContractSchema(Schema):
         unknown = INCLUDE
         ordered = True
 
-    name = fields.Str(required=True)
-    image_url = fields.Str(required=True)
+    name = fields.Str(required=True, validate=NotBlank())
+    image_url = fields.Str(required=True, validate=NotBlank())
     description = fields.Str(allow_none=True)
     supply = fields.Int(allow_none=True, validate=is_valid_number, missing=0)
     price = fields.Float(allow_none=True, validate=is_valid_number)
-    type = fields.Str(required=True)
+    type = fields.Str(required=True, validate=NotBlank())
     percent = fields.Float(allow_none=True)
     properties = fields.List(fields.Nested(MetadataPropertiesSchema()), allow_none=True, missing=[])
     actions = fields.List(fields.Nested(MetadataActionsSchema()), allow_none=True, missing=[])
 
 
 class ContractDescriptionSchema(Schema):
-    title = fields.Str(required=True)
-    html_content = fields.Str(required=True)
+    title = fields.Str(required=True, validate=NotBlank())
+    html_content = fields.Str(required=True, validate=NotBlank())
     image_url = fields.Str(allow_none=True, missing='')
 
 
@@ -45,8 +45,8 @@ class SMCCreateContractRequestSchema(Schema):
     class Meta:
         unknown = RAISE
 
-    name = fields.String(required=True)
-    symbol = fields.String(required=True)
+    name = fields.String(required=True, validate=NotBlank())
+    symbol = fields.String(required=True, validate=NotBlank())
     # total_supply = fields.Integer(allow_none=True, validate=is_valid_number)
     # total_raise = fields.Float(allow_none=True, validate=is_valid_number)
     chain = fields.String(required=True, validate=validate.OneOf([
@@ -65,7 +65,7 @@ class SMCCreateContractRequestSchema(Schema):
     # description = fields.List(fields.Nested(ContractDescriptionSchema()), allow_none=True, missing=[])
     # about_owner = fields.Str(allow_none=True)
     # owner_image_url = fields.Str(allow_none=True)
-    image_url = fields.Str(required=True)
+    image_url = fields.Str(required=True, validate=NotBlank())
     template_id = fields.String(required=True, validate=IsObjectId())
     highlight_text = fields.Str(allow_none=True)
     # max_allocation = fields.Int(allow_none=True, validate=is_valid_number)
