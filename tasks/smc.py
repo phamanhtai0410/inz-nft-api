@@ -15,10 +15,10 @@ from connect import redis_cluster
 
 
 @worker.task(name='worker.create_domain', rate_limit='1000/s')
-def create_domain(user: str, subdomain: str, contract_id: str, template_id: str):
+def create_domain(user: str, subdomain: str, contract_id: str, user_template_id: str):
     debug(f'Worker: Create domain ----- Contract ID: {contract_id}')
 
-    _create_domain_status_key = f'smc:template_id:{template_id}:create_domain:status'
+    _create_domain_status_key = f'smc:user_template_id:{user_template_id}:create_domain:status'
     try:
         # _status_code, _resp = iapi_services.check_campaign_subdomain_valid(subdomain=subdomain)
         # if _status_code != 200:
@@ -52,8 +52,7 @@ def create_domain(user: str, subdomain: str, contract_id: str, template_id: str)
 
         UsersTemplatesModel.update_one(
             filter={
-                "user_id": ObjectId(user),
-                "template_id": ObjectId(template_id),
+                "_id": ObjectId(user_template_id),
             },
             obj={
                 'website_domain': subdomain,
@@ -108,8 +107,8 @@ def create_contract_smc(contract_id, *args, **kwargs):
 
 @worker.task(name="worker.insert_new_contract", rate_limit="1000/s")
 def insert_new_contract(data: dict, user: str, standard: str):
-    _template_id = get(data, 'template_id')
-    debug(f'Worker: Insert New SMC ----- User ID: {user} ----- Template ID: {_template_id}')
+    _user_template_id = get(data, 'user_template_id')
+    debug(f'Worker: Insert New SMC ----- User ID: {user} ----- User template ID: {_user_template_id}')
     try:
         # Fixed currency for demo
         _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
@@ -117,7 +116,7 @@ def insert_new_contract(data: dict, user: str, standard: str):
             chain=get(data, 'chain')
         )
 
-        del data['template_id']
+        del data['user_template_id']
 
         _contract_inserted = NFTContractsModel.insert_one({
             **data,
@@ -135,8 +134,7 @@ def insert_new_contract(data: dict, user: str, standard: str):
         # TODO: Limit contracts user can create
         _user_template = UsersTemplatesModel.find_one(
             filter={
-                'user_id': ObjectId(user),
-                'template_id': ObjectId(_template_id),
+                '_id': ObjectId(_user_template_id),
             }
         )
         _user_contracts = get(_user_template, 'contracts', [])
@@ -150,11 +148,11 @@ def insert_new_contract(data: dict, user: str, standard: str):
             }
         )
 
-        debug(f"User ID: {user} ----- Template ID: {_template_id} ----- Insert user contract success")
+        debug(f"User ID: {user} ----- User template ID: {_user_template_id} ----- Insert user contract success")
         return 'DONE'
 
     except:
         sentry_sdk.capture_exception()
         traceback.print_exc()
-        debug(f"User ID: {user} ----- Template ID: {_template_id} ----- Insert user contract failed with exception!")
+        debug(f"User ID: {user} ----- User template ID: {_user_template_id} ----- Insert user contract failed with exception!")
         return 'FAIL'

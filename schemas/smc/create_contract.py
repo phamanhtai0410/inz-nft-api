@@ -66,7 +66,7 @@ class SMCCreateContractRequestSchema(Schema):
     # about_owner = fields.Str(allow_none=True)
     # owner_image_url = fields.Str(allow_none=True)
     image_url = fields.Str(required=True, validate=NotBlank())
-    template_id = fields.String(required=True, validate=IsObjectId())
+    user_template_id = fields.String(required=True, validate=IsObjectId())
     highlight_text = fields.Str(allow_none=True)
     # max_allocation = fields.Int(allow_none=True, validate=is_valid_number)
     # start_time = DatetimeField(allow_none=True)
