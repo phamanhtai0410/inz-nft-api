@@ -22,7 +22,7 @@ class SMCSignatureService:
             'is_whitelist': _is_whitelist
         }
 
-        _signature = SignatureHelper.generate_signature(data=_sign_data)
+        _signature, _deadline = SignatureHelper.generate_signature(data=_sign_data)
 
         _log_id = str(uuid.uuid4())
 
@@ -30,6 +30,7 @@ class SMCSignatureService:
             **_sign_data,
             'log_id': _log_id,
             'signature': _signature,
+            'deadline': _deadline,
             'created_by': 'inz-nft-api:SMCSignatureService:SM:create_signature'
         }, worker=True)
 
@@ -38,5 +39,6 @@ class SMCSignatureService:
                 **_sign_data,
                 'callback': _log_id
             },
-            'signature': _signature
+            'signature': _signature,
+            'deadline': _deadline
         }
