@@ -89,3 +89,10 @@ class SMCCreateContractResponseSchema(Schema):
 
     name = fields.Str(required=True)
     is_released = fields.Bool(required=True)
+    symbol = fields.String(required=True)
+    chain = fields.String(required=True)
+    currency = fields.String(required=True)
+    image_url = fields.Str(required=True)
+    user_template_id = fields.String(required=True)
+    highlight_text = fields.Str(allow_none=True)
+    nft_list = fields.List(fields.Nested(NFTOfContractSchema()), required=True)
