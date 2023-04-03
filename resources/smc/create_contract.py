@@ -32,5 +32,6 @@ class SMCCreateContractResource(Resource):
 
         return {
             'name': _name,
-            'is_released': _is_released
+            'is_released': _is_released,
+            **form_data
         }
