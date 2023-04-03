@@ -55,5 +55,5 @@ class SignatureHelper:
             private_key=Config.AUTH_PRIVATE_KEY
         )
 
-        return _signed_message.signature.hex()
+        return _signed_message.signature.hex(), _deadline
 
