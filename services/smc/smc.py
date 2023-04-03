@@ -205,7 +205,7 @@ class SMCServices:
         if _contract is None:
             raise BadRequest(msg='Invalid params.', errors=['Collection does not exist.'])
 
-        if _contract_id not in _user_contracts:
+        if ObjectId(_contract_id) not in _user_contracts:
             raise BadRequest(msg="Not have permissions to release this contract!")
 
         if get(_contract, 'is_deleted'):
