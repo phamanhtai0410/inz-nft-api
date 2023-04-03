@@ -7,7 +7,7 @@ from pydash import get
 
 from config import Config
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
-from lib import TaskStatus
+from lib import TaskStatus, ContractInsertType
 from lib.logger import debug
 from models import NFTContractsModel, UsersTemplatesModel
 from worker import worker
@@ -122,7 +122,7 @@ def insert_new_contract(data: dict, user: str, standard: str):
         _contract_inserted = NFTContractsModel.insert_one({
             **data,
             'standard': standard,
-            # 'type': ContractInsertType.CREATE,
+            'type': ContractInsertType.CREATE,
             'deploy_address': '',
             'currency_address': _currency_address.lower(),
             'is_deleted': False,
@@ -140,7 +140,7 @@ def insert_new_contract(data: dict, user: str, standard: str):
             }
         )
         _user_contracts = get(_user_template, 'contracts', [])
-        _user_contracts.append(str(get(_contract_inserted, '_id')))
+        _user_contracts.append(get(_contract_inserted, '_id'))
 
         UsersTemplatesModel.update_one(
             filter={'_id': ObjectId(get(_user_template, '_id'))},
