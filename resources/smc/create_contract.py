@@ -21,7 +21,7 @@ class SMCCreateContractResource(Resource):
         login_required=True
     )
     def post(self, form_data, login_info):
-        _name, _is_released = SMCServices.create_contract(
+        _contract_inserted = SMCServices.create_contract(
             user=str(get(login_info, 'user._id')),
             data={
                 'contract': '',
@@ -31,7 +31,5 @@ class SMCCreateContractResource(Resource):
         )
 
         return {
-            'name': _name,
-            'is_released': _is_released,
-            **form_data
+            **_contract_inserted
         }

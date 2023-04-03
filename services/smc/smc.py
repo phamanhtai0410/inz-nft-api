@@ -69,13 +69,33 @@ class SMCServices:
         debug("Contract dict have index_type 2: ", data)
 
         # insert nft_contracts, users_contracts
+        # Fixed currency for demo
+        _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
+            symbol=get(data, 'currency'),
+            chain=get(data, 'chain')
+        )
+
+        del data['user_template_id']
+
+        _contract_inserted = NFTContractsModel.insert_one({
+            **data,
+            'standard': _standard,
+            'type': ContractInsertType.CREATE,
+            'deploy_address': '',
+            'currency_address': _currency_address.lower(),
+            'is_deleted': False,
+            'deleted_time': None,
+            'deleted_by': '',
+            'created_by': 'inz-nft-api:tasks:insert_new_contract',
+            'updated_by': ''
+        })
         insert_new_contract.delay(
             data=data,
             user=user,
-            standard=_standard
+            contract_id=str(get(_contract_inserted, '_id'))
         )
 
-        return get(data, 'name'), get(data, 'is_released')
+        return _contract_inserted
 
     @classmethod
     def update_non_released_contract(cls, user, data, contract_id):

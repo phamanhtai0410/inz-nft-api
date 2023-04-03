@@ -3,7 +3,7 @@ from marshmallow import Schema, EXCLUDE, fields, RAISE, validate, INCLUDE
 from enums.order import Currency
 # from enums.contract import ContractMethod
 from helper.validator import is_valid_number
-from lib import Chains, IsObjectId, NotBlank
+from lib import Chains, IsObjectId, NotBlank, ObjectIdField
 
 
 class MetadataPropertiesSchema(Schema):
@@ -87,12 +87,12 @@ class SMCCreateContractResponseSchema(Schema):
         unknown = EXCLUDE
         ordered = True
 
+    _id = ObjectIdField(required=True)
     name = fields.Str(required=True)
-    is_released = fields.Bool(required=True)
     symbol = fields.String(required=True)
+    is_released = fields.Bool(required=True)
     chain = fields.String(required=True)
     currency = fields.String(required=True)
     image_url = fields.Str(required=True)
-    user_template_id = fields.String(required=True)
     highlight_text = fields.Str(allow_none=True)
     nft_list = fields.List(fields.Nested(NFTOfContractSchema()), required=True)
