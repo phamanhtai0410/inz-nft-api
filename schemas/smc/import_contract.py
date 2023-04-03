@@ -27,7 +27,7 @@ class SMCImportContractRequestSchema(Schema):
     #     TokenStandard.ERC1155
     # ]))
     image_url = fields.Str(allow_none=True)
-    template_id = fields.String(required=True, validate=IsObjectId())
+    user_template_id = fields.String(required=True, validate=IsObjectId())
     highlight_text = fields.Str(allow_none=True, default='')
     # social_link = fields.Dict(allow_none=True, default={})
     # nft_list = fields.List(fields.Nested(NFTOfContractSchema()), default=[])
