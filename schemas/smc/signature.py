@@ -16,7 +16,7 @@ class SMCSignatureSchema(Schema):
     amount = fields.Integer(required=True, validate=validate.Range(min=1))
 
 class SMCSignatureResponseObj(SMCSignatureSchema):
-    discount = fields.Float(default=0, missing=0)
+    discount = fields.Integer(default=0, missing=0)
     is_whitelist = fields.Boolean(default=False, missing=False)
     callback = fields.String(required=True)
 

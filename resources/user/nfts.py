@@ -13,18 +13,20 @@ from schemas import NFTsRequestSchema, NFTsResponseSchema
 from services import NFTsServices
 
 
-class NFTsResource(Resource):
+class UserNFTsResource(Resource):
 
     @security.http(
         params=NFTsRequestSchema(),
-        response=NFTsResponseSchema()
+        response=NFTsResponseSchema(),
+        login_required=True
     )
-    def get(self, params):
+    def get(self, params, login_info):
         _contracts = request.args.getlist('contract[]', str)
 
-        _response = NFTsServices.get_marketplace_by_contracts(params={
+        _response = NFTsServices.get_user_nfts(user_id=get(login_info, 'user._id'), params={
             **params,
             'contracts': _contracts
         })
 
         return _response
+

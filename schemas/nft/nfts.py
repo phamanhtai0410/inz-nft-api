@@ -29,8 +29,9 @@ class NFTSchema(Schema):
     token_id = fields.Integer(required=True)
     on_market = fields.Boolean(required=True)
     type = fields.Integer(required=True)
-    metadata_link = fields.String(required=True)
+    metadata_link = fields.String(default='', missing='', allow_none=True)
     user = ObjectIdField()
+    image_url = fields.String(default='', missing='', allow_none=True)
 
 
 class NFTsResponseSchema(Schema):

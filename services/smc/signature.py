@@ -10,7 +10,7 @@ class SMCSignatureService:
     @staticmethod
     def create_signature(form_data):
         # NOTE: does not have rule about discount and whitelist yet
-        _discount = 0
+        _discount = int(0)
         _is_whitelist = False
 
         _sign_data = {
