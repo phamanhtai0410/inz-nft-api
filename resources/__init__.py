@@ -9,6 +9,7 @@ from resources.hello import HelloWorld
 # from resources.iapi import iapi_resources
 from resources.nfts import nfts_resources
 from resources.smc import smc_resources
+from resources.user import user_nfts_resources
 
 api_resources = {
     '/hello': HelloWorld,
@@ -16,4 +17,6 @@ api_resources = {
     # **{f'/iapi{k}': val for k, val in iapi_resources.items()},
     **{f'{k}': val for k, val in nfts_resources.items()},
     **{f'/smc{k}': val for k, val in smc_resources.items()},
+    **{f'/user{k}': val for k, val in user_nfts_resources.items()},
+    
 }
