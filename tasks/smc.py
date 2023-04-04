@@ -106,15 +106,14 @@ def create_contract_smc(contract_id, *args, **kwargs):
 
 
 @worker.task(name="worker.insert_new_contract", rate_limit="1000/s")
-def insert_new_contract(data: dict, user: str, contract_id: str):
-    _user_template_id = get(data, 'user_template_id')
-    debug(f'Worker: Insert New SMC ----- User ID: {user} ----- User template ID: {_user_template_id}')
+def insert_new_contract(user_template_id: str, user: str, contract_id: str):
+    debug(f'Worker: Insert New SMC ----- User ID: {user} ----- User template ID: {user_template_id}')
     try:
 
         # TODO: Limit contracts user can create
         _user_template = UsersTemplatesModel.find_one(
             filter={
-                '_id': ObjectId(_user_template_id),
+                '_id': ObjectId(user_template_id),
             }
         )
         _user_contracts = get(_user_template, 'contracts', [])
@@ -128,11 +127,11 @@ def insert_new_contract(data: dict, user: str, contract_id: str):
             }
         )
 
-        debug(f"User ID: {user} ----- User template ID: {_user_template_id} ----- Insert user contract success")
+        debug(f"User ID: {user} ----- User template ID: {user_template_id} ----- Insert user contract success")
         return 'DONE'
 
     except:
         sentry_sdk.capture_exception()
         traceback.print_exc()
-        debug(f"User ID: {user} ----- User template ID: {_user_template_id} ----- Insert user contract failed with exception!")
+        debug(f"User ID: {user} ----- User template ID: {user_template_id} ----- Insert user contract failed with exception!")
         return 'FAIL'

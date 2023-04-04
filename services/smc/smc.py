@@ -75,6 +75,7 @@ class SMCServices:
             chain=get(data, 'chain')
         )
 
+        _user_template_id = get(data, 'user_template_id')
         del data['user_template_id']
 
         _contract_inserted = NFTContractsModel.insert_one({
@@ -90,7 +91,7 @@ class SMCServices:
             'updated_by': ''
         })
         insert_new_contract.delay(
-            data=data,
+            user_template_id=str(_user_template_id),
             user=user,
             contract_id=str(get(_contract_inserted, '_id'))
         )
