@@ -27,4 +27,5 @@ class SMCSignatureResponseSchema(Schema):
         ordered = True
 
     signature = fields.String()
+    deadline = fields.Int()
     data = fields.Nested(SMCSignatureResponseObj)
