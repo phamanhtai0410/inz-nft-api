@@ -1,6 +1,5 @@
 from marshmallow import fields, Schema, INCLUDE, EXCLUDE
-
-from lib import ObjectIdField
+from lib import ObjectIdField, IsObjectId
 
 
 class SMCReleaseContractRequestSchema(Schema):
@@ -8,8 +7,8 @@ class SMCReleaseContractRequestSchema(Schema):
         unknown = INCLUDE
         ordered = True
 
-    contract_id = ObjectIdField(required=True)
-    user_template_id = ObjectIdField(required=True)
+    contract_id = fields.Str(required=True, validate=IsObjectId())
+    user_template_id = fields.Str(required=True, validate=IsObjectId())
     website_domain = fields.Str(required=True)
 
 
@@ -18,7 +17,7 @@ class SMCReleaseContractResponseSchema(Schema):
         unknown = EXCLUDE
         ordered = True
 
-    _id = fields.Str(required=True)
+    _id = ObjectIdField(required=True)
     domain = fields.Str(required=True)
     create_domain_status = fields.Str(required=True)
     create_smc_status = fields.Str(required=True)
