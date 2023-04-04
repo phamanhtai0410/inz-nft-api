@@ -55,8 +55,13 @@ def create_domain(user: str, subdomain: str, contract_id: str, user_template_id:
                 "_id": ObjectId(user_template_id),
             },
             obj={
-                'website_domain': subdomain,
                 'updated_by': 'inz-nft-api:tasks:create_domain'
+            },
+            extract={
+                '$addToSet': {
+                    'website_domain': subdomain,
+                    'full_domain': get(_resp_create_new_domain, 'data.full_domain'),
+                }
             }
         )
 
