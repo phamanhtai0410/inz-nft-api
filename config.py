@@ -34,6 +34,12 @@ class Config:
     CELERY_ROUTES = {
         'worker.create_domain': {'queue': 'inz-smc-queue'},
         'worker.create_contract_smc': {'queue': 'inz-smc-queue'},
+        'worker.insert_new_contract': {'queue': 'inz-smc-queue'},
+        'worker.send_task_import_contract': {'queue': 'inz-smc-queue'},
+    }
+
+    TASKS_NAME = {
+        'IMPORT_CONTRACT': 'worker.task_scan_import_nft'
     }
 
     PUBLIC_PATH = os.getenv('PUBLIC_PATH')

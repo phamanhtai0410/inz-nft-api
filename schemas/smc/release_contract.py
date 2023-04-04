@@ -9,6 +9,7 @@ class SMCReleaseContractRequestSchema(Schema):
         ordered = True
 
     contract_id = ObjectIdField(required=True)
+    user_template_id = ObjectIdField(required=True)
     website_domain = fields.Str(required=True)
 
 

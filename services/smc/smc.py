@@ -2,14 +2,14 @@ from datetime import timezone, datetime
 from bson import ObjectId
 from pydash import get
 from config import Config
-from enums.order import Currency
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
-from lib import ClientAPI, BadRequest, dt_utcnow, ContractInsertType, TokenStandard, Chains, TaskStatus
+from helper.user.user_template import UserTemplateHelpers
+from lib import ClientAPI, BadRequest, dt_utcnow, TokenStandard, TaskStatus, ContractInsertType
 from lib.logger import debug
-from models import NFTContractsModel
+from models import NFTContractsModel, UsersTemplatesModel
 from services.dapp import INZDappServices
 from services.iapi import IAPIServices
-from tasks import create_domain, create_contract_smc
+from tasks import create_domain, create_contract_smc, insert_new_contract, send_task_import_contract
 from connect import redis_cluster
 
 _inz_dapp_client = ClientAPI(host=Config.INZ_DAPP_BASE_URL)
@@ -24,8 +24,7 @@ class SMCServices:
     @classmethod
     def create_contract(cls, user: str, data: dict):
         _result = _inz_dapp_services.is_user_template_exist(params={
-            'template': get(data, 'template_id'),
-            'user': user
+            'user_template': get(data, 'user_template_id')
         })
         if _result.status_code == 400:
             raise BadRequest(msg='Invalid params.', errors=get(_result.json(), 'errors'))
@@ -69,14 +68,17 @@ class SMCServices:
 
         debug("Contract dict have index_type 2: ", data)
 
+        # insert nft_contracts, users_contracts
         # Fixed currency for demo
         _currency_address = CryptoCurrenciesHelpers.get_address_by_symbol(
             symbol=get(data, 'currency'),
             chain=get(data, 'chain')
         )
 
-        NFTContractsModel.insert_one({
-            'user_id': ObjectId(user),
+        _user_template_id = get(data, 'user_template_id')
+        del data['user_template_id']
+
+        _contract_inserted = NFTContractsModel.insert_one({
             **data,
             'standard': _standard,
             'type': ContractInsertType.CREATE,
@@ -85,11 +87,16 @@ class SMCServices:
             'is_deleted': False,
             'deleted_time': None,
             'deleted_by': '',
-            'created_by': 'inz-nft-api:services:SMCServices:create_contract',
+            'created_by': 'inz-nft-api:tasks:insert_new_contract',
             'updated_by': ''
         })
+        insert_new_contract.delay(
+            user_template_id=str(_user_template_id),
+            user=user,
+            contract_id=str(get(_contract_inserted, '_id'))
+        )
 
-        return get(data, 'name'), get(data, 'is_released')
+        return _contract_inserted
 
     @classmethod
     def update_non_released_contract(cls, user, data, contract_id):
@@ -179,31 +186,20 @@ class SMCServices:
 
     @classmethod
     def import_contract(cls, user, data, contract_address):
-        _contract = NFTContractsModel.find_one(filter={
-            'contract': contract_address,
-            'chain': get(data, 'chain'),
-            'user_id': ObjectId(user)
-        })
-        if _contract is not None:
-            raise BadRequest(msg='Invalid params.', errors=['Contract is exist.'])
-
-        # Check if subdomain
-        _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
-            get(data, 'website_domain'))
-
-        if _check_domain_status_code != 200:
-            raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
-
-        if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
-            raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
+        _user_template_id = get(data, 'user_template_id')
+        _is_exist = UserTemplateHelpers.is_use_template_with_contract(
+            user=user,
+            contract_address=contract_address,
+            user_template_id=_user_template_id
+        )
+        if _is_exist:
+            raise BadRequest(msg="Contract is already used with this template.")
 
         debug("*** Contract import : ", data)
 
         _contract_inserted = NFTContractsModel.insert_one({
-            'user_id': ObjectId(user),
             **data,
             'currency_address': '',
-            'max_allocation': None,
             'is_released': True,
             'type': ContractInsertType.IMPORT,
             'is_deleted': False,
@@ -212,6 +208,7 @@ class SMCServices:
             'created_by': 'inz-nft-api:services:SMCServices:import_contract',
             'updated_by': ''
         })
+        send_task_import_contract.delay({'chain': get(data, 'chain'), 'address': get(data, 'address')})
 
         return get(_contract_inserted, '_id'), True
 
@@ -219,56 +216,66 @@ class SMCServices:
     def release_contract(cls, user, data):
         _contract_id = str(get(data, 'contract_id'))
         _website_domain = get(data, 'website_domain')
+        _user_template_id = str(get(data, 'user_template_id'))
         _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(_contract_id)})
+        _user_template = UsersTemplatesModel.find_one(filter={
+            '_id': ObjectId(_user_template_id),
+        })
+        _user_contracts = get(_user_template, 'contracts', [])
 
         if _contract is None:
-            raise BadRequest(msg='Invalid params.', errors=['Contract does not exist.'])
+            raise BadRequest(msg='Invalid params.', errors=['Collection does not exist.'])
 
-        if _contract['is_released']:
-            raise BadRequest(msg="This contract's already released!")
-
-        if _contract['user_id'] != ObjectId(user):
+        if ObjectId(_contract_id) not in _user_contracts:
             raise BadRequest(msg="Not have permissions to release this contract!")
 
-        if _contract["is_deleted"]:
-            raise BadRequest(msg="This contract's already been deleted!")
+        if get(_contract, 'is_deleted'):
+            raise BadRequest(msg="This collection's already been deleted!")
 
-        _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(_website_domain)
+        # if True => imported contract else created contract
+        _is_import = get(_contract, 'contract', '') != ''
 
-        if _check_domain_status_code != 200:
-            raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
+        _create_domain_status = TaskStatus.DONE
+        if not get(_user_template, 'website_domain'):
+            _create_domain_status_key = f'smc:user_template_id:{_user_template_id}:create_domain:status'
+            _create_domain_status = redis_cluster.get(_create_domain_status_key)
+            if not _create_domain_status or _create_domain_status == TaskStatus.FAIL:
+                _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(
+                    _website_domain)
 
-        if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
-            raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
+                if _check_domain_status_code != 200:
+                    raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
 
-        _create_domain_status_key = f'smc:_id:{_contract_id}:create_domain:status'
-        _create_domain_status = redis_cluster.get(_create_domain_status_key)
-        _create_smc_status_key = f'smc:_id:{_contract_id}:create_smc:status'
-        _create_smc_status = redis_cluster.get(_create_smc_status_key)
+                if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
+                    raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
-        if not _create_domain_status or _create_domain_status == TaskStatus.FAIL:
-            create_domain.delay(
-                iapi_services=_iapi_services,
-                contract_id=_contract_id,
-                subdomain=_website_domain
-            )
-            redis_cluster.set(_create_domain_status_key, TaskStatus.PROCESSING)
-            _create_domain_status = TaskStatus.PROCESSING
+                create_domain.delay(
+                    user=user,
+                    subdomain=_website_domain,
+                    contract_id=_contract_id,
+                    user_template_id=_user_template_id
+                )
+                redis_cluster.set(_create_domain_status_key, TaskStatus.PROCESSING)
+                _create_domain_status = TaskStatus.PROCESSING
 
-        if not _create_smc_status or _create_smc_status == TaskStatus.FAIL:
-            for _key, _value in _contract.items():
-                if isinstance(_value, ObjectId):
-                    _contract[_key] = str(_value)
-                if isinstance(_value, datetime):
-                    _contract[_key] = _value.replace(tzinfo=timezone.utc).timestamp()
+        _create_smc_status = TaskStatus.DONE
+        if not _is_import:
+            _create_smc_status_key = f'smc:_id:{_contract_id}:create_smc:status'
+            _create_smc_status = redis_cluster.get(_create_smc_status_key)
+            if not _create_smc_status or _create_smc_status == TaskStatus.FAIL:
+                for _key, _value in _contract.items():
+                    if isinstance(_value, ObjectId):
+                        _contract[_key] = str(_value)
+                    if isinstance(_value, datetime):
+                        _contract[_key] = _value.replace(tzinfo=timezone.utc).timestamp()
 
-            debug('_contract_dict after encode: ', _contract, type(_contract))
+                debug(f'_contract_dict after encode: {_contract} ----- type: {type(_contract)}')
 
-            create_contract_smc.delay(
-                contract_id=_contract_id
-            )
-            redis_cluster.set(_create_smc_status_key, TaskStatus.PROCESSING)
-            _create_smc_status = TaskStatus.PROCESSING
+                create_contract_smc.delay(
+                    contract_id=_contract_id
+                )
+                redis_cluster.set(_create_smc_status_key, TaskStatus.PROCESSING)
+                _create_smc_status = TaskStatus.PROCESSING
 
         return _contract_id, _website_domain, _create_domain_status, _create_smc_status
 
