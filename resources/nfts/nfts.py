@@ -6,6 +6,7 @@
 """
 from flask_restful import Resource
 from pydash import get
+from flask import request
 
 from connect import security
 from schemas import NFTsRequestSchema, NFTsResponseSchema
@@ -16,22 +17,24 @@ class NFTsResource(Resource):
 
     @security.http(
         params=NFTsRequestSchema(),
-        response=NFTsResponseSchema(),
-        is_blockchain=True
+        response=NFTsResponseSchema()
     )
-    def get(self, params, contract):
+    def get(self, params):
 
         _page = get(params, 'page', default=1)
         _page_size = get(params, 'page_size', default=10)
         _chain = get(params, 'chain', default=None)
-        _sort_price = get(params, 'sort_price', default=None)
+        _sort_field = get(params, 'sort_field', default=None)
+        _sort_type = get(params, 'sort_type', default=None)
+        _contracts = request.args.getlist('contract[]', str)
 
         _response = NFTsServices.get_nfts(
             page=_page,
             page_size=_page_size,
             chain=_chain,
-            contract=contract,
-            sort_price=_sort_price
+            contracts=_contracts,
+            sort_field=_sort_field,
+            sort_type=_sort_type
         )
 
         return _response
