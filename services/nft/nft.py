@@ -16,7 +16,7 @@ class NFTsServices:
             sort_field: str = None,
             sort_type: str = None
     ):
-        _filter = {'on_market': False}
+        _filter = {'on_market': True}
         _func_sort = None
         _sort = None
 
@@ -25,6 +25,8 @@ class NFTsServices:
 
         _web3 = web3.Web3()
         _contracts = [x.lower() for x in contracts if _web3.isAddress(x) ]
+        if not _contracts:
+            return {}
 
         if _contracts:
             _filter['contract'] = {
