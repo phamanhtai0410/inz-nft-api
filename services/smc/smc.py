@@ -237,7 +237,7 @@ class SMCServices:
 
         _create_domain_status = TaskStatus.DONE
         if _website_domain not in get(_user_template, 'website_domain', []):
-            _create_domain_status_key = f'smc:user_template_id:{_user_template_id}:create_domain:status'
+            _create_domain_status_key = f'smc:user_template_id:{_user_template_id}:create_domain:{_website_domain}:status'
             _create_domain_status = redis_cluster.get(_create_domain_status_key)
             if not _create_domain_status or _create_domain_status == TaskStatus.FAIL:
                 _check_domain_status_code, _check_subdomain_resp = _iapi_services.check_campaign_subdomain_valid(

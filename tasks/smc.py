@@ -18,7 +18,7 @@ from connect import redis_cluster
 def create_domain(user: str, subdomain: str, contract_id: str, user_template_id: str):
     debug(f'Worker: Create domain ----- Contract ID: {contract_id}')
 
-    _create_domain_status_key = f'smc:user_template_id:{user_template_id}:create_domain:status'
+    _create_domain_status_key = f'smc:user_template_id:{user_template_id}:create_domain:{subdomain}:status'
     try:
         # _status_code, _resp = iapi_services.check_campaign_subdomain_valid(subdomain=subdomain)
         # if _status_code != 200:
