@@ -1,6 +1,7 @@
 from datetime import timezone, datetime
 from bson import ObjectId
 from pydash import get
+from slugify import slugify
 from config import Config
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
 from helper.user.user_template import UserTemplateHelpers
@@ -215,7 +216,7 @@ class SMCServices:
     @classmethod
     def release_contract(cls, user, data):
         _contract_id = str(get(data, 'contract_id'))
-        _website_domain = get(data, 'website_domain')
+        _website_domain = slugify(get(data, 'website_domain', ''))
         _user_template_id = str(get(data, 'user_template_id'))
         _contract = NFTContractsModel.find_one(filter={'_id': ObjectId(_contract_id)})
         _user_template = UsersTemplatesModel.find_one(filter={
