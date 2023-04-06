@@ -85,6 +85,7 @@ class SMCServices:
             'type': ContractInsertType.CREATE,
             'deploy_address': '',
             'currency_address': _currency_address.lower(),
+            'user_id': ObjectId(user),
             'is_deleted': False,
             'deleted_time': None,
             'deleted_by': '',
@@ -188,7 +189,7 @@ class SMCServices:
     @classmethod
     def import_contract(cls, user, data, contract_address):
         _user_template_id = get(data, 'user_template_id')
-        _is_exist = UserTemplateHelpers.is_use_template_with_contract(
+        _is_exist, _contract = UserTemplateHelpers.is_use_template_with_contract(
             user=user,
             contract_address=contract_address,
             user_template_id=_user_template_id
@@ -198,20 +199,23 @@ class SMCServices:
 
         debug("*** Contract import : ", data)
 
-        _contract_inserted = NFTContractsModel.insert_one({
-            **data,
-            'currency_address': '',
-            'is_released': True,
-            'type': ContractInsertType.IMPORT,
-            'is_deleted': False,
-            'deleted_time': None,
-            'deleted_by': '',
-            'created_by': 'inz-nft-api:services:SMCServices:import_contract',
-            'updated_by': ''
-        })
-        send_task_import_contract.delay({'chain': get(data, 'chain'), 'address': get(data, 'address')})
+        if _contract is None:
+            _contract_inserted = NFTContractsModel.insert_one({
+                **data,
+                'currency_address': '',
+                'is_released': False,
+                'type': ContractInsertType.IMPORT,
+                'user_id': ObjectId(user),
+                'is_deleted': False,
+                'deleted_time': None,
+                'deleted_by': '',
+                'created_by': 'inz-nft-api:services:SMCServices:import_contract',
+                'updated_by': ''
+            })
+            return _contract_inserted
+        # send_task_import_contract.delay({'chain': get(data, 'chain'), 'address': get(data, 'address')})
 
-        return get(_contract_inserted, '_id'), True
+        return _contract
 
     @classmethod
     def release_contract(cls, user, data):

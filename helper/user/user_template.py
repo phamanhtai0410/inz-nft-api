@@ -2,7 +2,7 @@ from bson import ObjectId
 from pydash import get
 
 from connect import redis_cluster
-from models import UsersTemplatesModel
+from models import UsersTemplatesModel, NFTContractsModel
 
 
 class UserTemplateHelpers:
@@ -11,4 +11,18 @@ class UserTemplateHelpers:
         # _key = ''
         # redis_cluster.get()
         # TODO: Get contract with template user have add from redis
-        return True
+        _contract = NFTContractsModel.find_one({"contract": contract_address})
+        if _contract is None:
+            return False, None
+
+        _user_template = UsersTemplatesModel.find_one({
+            '_id': ObjectId(user_template_id),
+            'contracts': {
+                '$elemMatch': {
+                    '$eq': get(_contract, '_id')
+                }
+            }
+        })
+        if _user_template is None:
+            return False, _contract
+        return True, _contract
