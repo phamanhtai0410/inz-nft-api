@@ -24,11 +24,24 @@ class SMCServices:
 
     @classmethod
     def create_contract(cls, user: str, data: dict):
-        _result = _inz_dapp_services.is_user_template_exist(params={
-            'user_template': get(data, 'user_template_id')
+        # _result = _inz_dapp_services.is_user_template_exist(params={
+        #     'user_template': get(data, 'user_template_id')
+        # })
+        # if _result.status_code == 400:
+        #     raise BadRequest(msg='Invalid params.', errors=get(_result.json(), 'errors'))
+
+        _user_template_id = get(data, 'user_template_id')
+        _user_template = UsersTemplatesModel.find_one(filter={
+            '_id': ObjectId(_user_template_id),
+            'user_id': ObjectId(user)
         })
-        if _result.status_code == 400:
-            raise BadRequest(msg='Invalid params.', errors=get(_result.json(), 'errors'))
+
+        if _user_template is None:
+            raise BadRequest(msg='Invalid params.', errors=['Template is not owned.'])
+
+        _contracts = get(_user_template, 'contracts', [])
+        if _contracts:
+            raise BadRequest(msg='Invalid params.', errors=["'User's template is used.'"])
 
         _list_nft = get(data, 'nft_list', [])
         _standard = TokenStandard.ERC721
