@@ -20,3 +20,5 @@ CryptoCurrenciesModel = DaoModel(col=connect_db.db.crypto_currencies, redis=redi
 
 OrderModel = OrderDao(col=connect_db.db.orders, redis=redis_cluster, project=Config.PROJECT, broker=Config.BROKER_URL)
 SignatureLogModel = SignatureDao(col=connect_db.db.signature_log, redis=redis_cluster, project=Config.PROJECT, broker=Config.BROKER_URL)
+
+QrCodeModel = DaoModel(col=connect_db.db.qr_code, redis=redis_cluster)

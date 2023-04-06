@@ -8,17 +8,23 @@ from models import NFTContractsModel, NFTsModel
 class NFTsServices:
 
     @staticmethod
-    def mapping_nft_image_url(nft_items):
+    def mapping_nft_detail(nft_items):
         _nft_contracts = {}
 
-        def set_image_url(item, contract, type):
-            py_.set_(item, 'image_url', py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.image_url'))
+        def get_nft_detail(item, contract, type):
+            return {
+                **item,
+                'image_url': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.image_url'),
+                'name': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.name'),
+                # NOTE: if nft does not have previous price on sale will get default price
+                'price': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.price') if not py_.get(item, 'price') else py_.get(item, 'price')
+            }
 
         for _item in nft_items:
             _contract = py_.get(_item, 'contract').lower()
             _type = py_.get(_item, 'type')
             if _contract in _nft_contracts:
-                set_image_url(_item, _contract, _type)
+                _item = get_nft_detail(_item, _contract, _type)
                 continue
             
             # NOTE: cache later
@@ -31,7 +37,7 @@ class NFTsServices:
 
             py_.set_(_nft_contracts, _contract, _nft_contract)
 
-            set_image_url(_item, _contract, _type)
+            _item = get_nft_detail(_item, _contract, _type)
 
         return nft_items
 
@@ -83,7 +89,7 @@ class NFTsServices:
             func_sort=_func_sort
         )
 
-        _items = NFTsServices.mapping_nft_image_url(py_.get(_results, 'items'))
+        _items = NFTsServices.mapping_nft_detail(py_.get(_results, 'items'))
 
         py_.set_(_results, 'items', _items)
 
