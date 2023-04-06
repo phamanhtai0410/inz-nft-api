@@ -85,6 +85,7 @@ class SMCServices:
             'type': ContractInsertType.CREATE,
             'deploy_address': '',
             'currency_address': _currency_address.lower(),
+            'user_id': ObjectId(user),
             'is_deleted': False,
             'deleted_time': None,
             'deleted_by': '',
