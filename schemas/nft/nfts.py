@@ -32,6 +32,8 @@ class NFTSchema(Schema):
     metadata_link = fields.String(default='', missing='', allow_none=True)
     user = ObjectIdField()
     image_url = fields.String(default='', missing='', allow_none=True)
+    price = fields.Float(default=0, missing=0)
+    name = fields.String(default='', missing='')
 
 
 class NFTsResponseSchema(Schema):
