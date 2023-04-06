@@ -36,6 +36,7 @@ class Config:
         'worker.create_contract_smc': {'queue': 'inz-smc-queue'},
         'worker.insert_new_contract': {'queue': 'inz-smc-queue'},
         'worker.send_task_import_contract': {'queue': 'inz-smc-queue'},
+        'worker.task_generate_metamask_qr_code': {'queue': 'inz-qr-code-queue'}
     }
 
     TASKS_NAME = {
