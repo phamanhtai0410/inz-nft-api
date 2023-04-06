@@ -16,3 +16,4 @@ cryptography==38.0.3
 bcrypt==4.0.1
 web3==5.31.3
 python-slugify==8.0.1
+moralis==0.1.32
