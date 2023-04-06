@@ -23,13 +23,12 @@ class SMCImportContractResource(Resource):
     def post(self, form_data, login_info):
         _contract_address = get(form_data, 'contract')
 
-        _id, _result = SMCServices.import_contract(
+        _contract_imported = SMCServices.import_contract(
             user=str(get(login_info, 'user._id')),
             data=form_data,
             contract_address=_contract_address.lower()
         )
 
         return {
-            '_id': _id,
-            'result': _result
+            **_contract_imported
         }

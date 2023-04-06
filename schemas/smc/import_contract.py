@@ -39,4 +39,10 @@ class SMCImportContractResponseSchema(Schema):
         ordered = True
 
     _id = ObjectIdField(required=True)
-    result = fields.Bool(required=True)
+    name = fields.Str(allow_none=True)
+    contract = fields.Str(required=True)
+    symbol = fields.String(allow_none=True)
+    is_released = fields.Bool(required=True)
+    chain = fields.String(required=True)
+    image_url = fields.Str(required=True)
+    highlight_text = fields.Str(allow_none=True)
