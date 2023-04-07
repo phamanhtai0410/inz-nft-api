@@ -20,6 +20,8 @@ class NFTsServices:
                 'price': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.price') if not py_.get(item, 'price') else py_.get(item, 'price')
             }
 
+        _items = []
+
         for _item in nft_items:
             _contract = py_.get(_item, 'contract').lower()
             _type = py_.get(_item, 'type')
@@ -39,7 +41,9 @@ class NFTsServices:
 
             _item = get_nft_detail(_item, _contract, _type)
 
-        return nft_items
+            _items.append(_item)
+
+        return _items
 
 
     @classmethod
