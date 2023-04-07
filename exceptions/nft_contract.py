@@ -8,6 +8,7 @@ class NftContractNotFoundEx(Exception):
 
     pass
 
+
 class NftIndexTypeNotFoundEx(Exception):
     def __init__(self, msg='Nft Index Type Not Found', *args: object, **kwargs) -> None:
         super().__init__(*args)
