@@ -3,6 +3,7 @@ from bson import ObjectId
 from pydash import get
 from slugify import slugify
 from config import Config
+from exceptions.create_nft import UserTemplateIsUsedEx
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
 from helper.user.user_template import UserTemplateHelpers
 from lib import ClientAPI, BadRequest, dt_utcnow, TokenStandard, TaskStatus, ContractInsertType
@@ -41,7 +42,7 @@ class SMCServices:
 
         _contracts = get(_user_template, 'contracts', [])
         if _contracts:
-            raise BadRequest(msg='Invalid params.', errors=["'User's template is used.'"])
+            raise UserTemplateIsUsedEx
 
         _list_nft = get(data, 'nft_list', [])
         _standard = TokenStandard.ERC721
