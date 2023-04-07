@@ -15,11 +15,11 @@ class MoralisServices:
         return MoralisChains.BSC_TESTNET
 
     @classmethod
-    def get_nfts_list(cls, chain: str, contract_address: str, page_size=100):
+    def get_nfts_list(cls, chain: str, contract_address: str, page_size=10):
         # web3 = get(web3_providers, chain)
         _api_key = redis_cluster.get('moralis:api_key')
         params = {
-            "chain": 'bsc',
+            "chain": cls.get_moralis_chain(chain=chain),
             "format": "decimal",
             "limit": page_size,
             # "cursor": cursor,
