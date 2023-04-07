@@ -35,7 +35,7 @@ class NFTSchema(Schema):
     image_url = fields.String(default='', missing='', allow_none=True)
     price = fields.Float(default=0, missing=0)
     name = fields.String(default='', missing='')
-    deadline = DatetimeField()
+    buy_deadline = DatetimeField()
     buy_signature = fields.String(allow_none=True)
 
 

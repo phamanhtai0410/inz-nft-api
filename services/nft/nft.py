@@ -3,7 +3,7 @@ import pydash as py_
 import bson
 
 from models import NFTContractsModel, NFTsModel
-
+from lib import dt_utcnow
 
 class NFTsServices:
 
@@ -17,7 +17,7 @@ class NFTsServices:
                 'image_url': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.image_url'),
                 'name': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.name'),
                 # NOTE: if nft does not have previous price on sale will get default price
-                'price': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.price') if not py_.get(item, 'price') else py_.get(item, 'price')
+                'price': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.price') if not py_.get(item, 'price') else py_.get(item, 'price'),
             }
 
         _items = []
@@ -114,7 +114,10 @@ class NFTsServices:
 
         _result = NFTsServices.get_nfts(
             filter={
-                'on_market': True
+                'on_market': True,
+                'buy_deadline': {
+                    '$gt': dt_utcnow()
+                }
             },
             page=_page,
             page_size=_page_size,
