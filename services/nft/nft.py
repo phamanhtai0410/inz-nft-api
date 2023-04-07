@@ -27,6 +27,7 @@ class NFTsServices:
             _type = py_.get(_item, 'type')
             if _contract in _nft_contracts:
                 _item = get_nft_detail(_item, _contract, _type)
+                _items.append(_item)
                 continue
             
             # NOTE: cache later
@@ -96,7 +97,7 @@ class NFTsServices:
         _items = NFTsServices.mapping_nft_detail(py_.get(_results, 'items'))
 
         py_.set_(_results, 'items', _items)
-
+        
         return _results
 
     @staticmethod
