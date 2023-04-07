@@ -12,12 +12,16 @@ class NFTsServices:
         _nft_contracts = {}
 
         def get_nft_detail(item, contract, type):
+            _buy_deadline = py_.get(item, 'buy_deadline').timestamp() if py_.get(item, 'buy_deadline') else 0
+            _now = dt_utcnow().timestamp()
             return {
                 **item,
                 'image_url': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.image_url'),
                 'name': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.name'),
                 # NOTE: if nft does not have previous price on sale will get default price
                 'price': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.price') if not py_.get(item, 'price') else py_.get(item, 'price'),
+                'on_market': True if _buy_deadline > _now else False,
+
             }
 
         _items = []
@@ -112,9 +116,9 @@ class NFTsServices:
         if not _contracts:
             return {}
 
+        # NOTE: if buy_deadline existed and valid with time -> on_market will mark at true
         _result = NFTsServices.get_nfts(
             filter={
-                'on_market': True,
                 'buy_deadline': {
                     '$gt': dt_utcnow()
                 }
