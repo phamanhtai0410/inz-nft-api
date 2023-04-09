@@ -67,6 +67,10 @@ def create_domain(user: str, subdomain: str, contract_id: str, user_template_id:
 
         redis_cluster.set(_create_domain_status_key, TaskStatus.DONE)
         debug(f"Create subdomain successfully! {_resp_create_new_domain['data']['result']}")
+
+        _resp = requests.post(f'{Config.INZ_IAPI_BASE_URL}/telegram/send_message', json={
+            'message': f'<b>New Domain Release</b>\ndomain: <a href="{get(_resp_create_new_domain, "data.full_domain")}">{get(_resp_create_new_domain, "data.full_domain")}</a>'
+        }, verify=False, timeout=30)
         return 'DONE'
 
     except:
