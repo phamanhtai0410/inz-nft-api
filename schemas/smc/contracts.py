@@ -72,6 +72,8 @@ class ContractsSchema(Schema):
     nft_list = fields.List(fields.Nested(NFTOfContractSchema()))
     type = fields.String(required=True)
     deploy_address = fields.String(required=False, missing='')
+    factory_address = fields.String(required=False, missing='')
+    dapp_creator_address = fields.String(required=True, missing='')
     is_deleted = fields.Bool(required=True)
     deleted_time = DatetimeField(required=False, missing=None)
     is_released = fields.Bool(required=True)
