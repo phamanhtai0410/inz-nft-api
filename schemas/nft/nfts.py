@@ -11,7 +11,8 @@ class NFTsRequestSchema(Schema):
     page_size = fields.Integer(required=False, default=10, allow_none=True)
     chain = fields.String(validate=validate.OneOf([
         Chains.BSC,
-        Chains.ETHEREUM
+        Chains.SCROLL,
+        Chains.BASE
     ]), allow_none=True)
     sort_field = fields.String(allow_none=True)
     sort_type = fields.String(validate=validate.OneOf([

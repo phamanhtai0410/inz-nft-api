@@ -15,7 +15,8 @@ class SMCImportContractRequestSchema(Schema):
     symbol = fields.String(allow_none=True)
     chain = fields.String(required=True, validate=validate.OneOf([
         Chains.BSC,
-        Chains.ETHEREUM
+        Chains.SCROLL,
+        Chains.BASE
     ]))
     # currency = fields.String(required=True, validate=validate.OneOf([
     #     Currency.BUSD,
