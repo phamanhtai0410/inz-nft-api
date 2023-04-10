@@ -51,12 +51,11 @@ class SMCCreateContractRequestSchema(Schema):
     # total_raise = fields.Float(allow_none=True, validate=is_valid_number)
     chain = fields.String(required=True, validate=validate.OneOf([
         Chains.BSC,
-        Chains.ETHEREUM
+        Chains.BASE,
+        Chains.SCROLL,
     ]))
     currency = fields.String(required=True, validate=validate.OneOf([
-        Currency.BUSD,
         Currency.USDT,
-        Currency.INZ,
     ]))
     # standard = fields.String(required=True, validate=validate.OneOf([
     #     TokenStandard.ERC721,

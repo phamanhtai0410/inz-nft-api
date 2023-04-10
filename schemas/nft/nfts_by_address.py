@@ -11,7 +11,8 @@ class NFTsByContractRequestSchema(Schema):
     # page_size = fields.Integer(required=False, default=10, allow_none=True)
     chain = fields.String(required=True, validate=validate.OneOf([
         Chains.BSC,
-        Chains.ETHEREUM
+        Chains.SCROLL,
+        Chains.BASE
     ]))
     contract_address = fields.String(required=True, validate=NotBlank())
 

@@ -23,12 +23,11 @@ class SMCUpdateNonReleasedContractRequestSchema(Schema):
     symbol = fields.Str(allow_none=True)
     chain = fields.String(required=False, allow_none=True, validate=validate.OneOf([
         Chains.BSC,
-        Chains.ETHEREUM
+        Chains.SCROLL,
+        Chains.BASE
     ]))
     currency = fields.String(required=False, allow_none=True, validate=validate.OneOf([
-        Currency.BUSD,
         Currency.USDT,
-        Currency.INZ,
     ]))
     # total_supply = fields.Int(allow_none=True, validate=is_valid_number)
     # total_raise = fields.Float(allow_none=True, validate=is_valid_number)
