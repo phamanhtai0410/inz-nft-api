@@ -1,5 +1,6 @@
 from datetime import timezone, datetime
 from bson import ObjectId
+import bson.json_util
 from pydash import get
 from slugify import slugify
 from config import Config
@@ -13,6 +14,7 @@ from services.dapp import INZDappServices
 from services.iapi import IAPIServices
 from tasks import create_domain, create_contract_smc, insert_new_contract, send_task_import_contract
 from connect import redis_cluster
+from flask import request
 
 _inz_dapp_client = ClientAPI(host=Config.INZ_DAPP_BASE_URL)
 _inz_dapp_services = INZDappServices(client=_inz_dapp_client)
@@ -272,7 +274,8 @@ class SMCServices:
                     user=user,
                     subdomain=_website_domain,
                     contract_id=_contract_id,
-                    user_template_id=_user_template_id
+                    user_template_id=_user_template_id,
+                    request_headers=bson.json_util.dumps(request.headers)
                 )
                 redis_cluster.set(_create_domain_status_key, TaskStatus.PROCESSING)
                 _create_domain_status = TaskStatus.PROCESSING
