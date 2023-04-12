@@ -265,9 +265,9 @@ class SMCServices:
                     _website_domain)
 
                 if _check_domain_status_code != 200:
-                    raise BadRequest(f"Submitted subdomain error: {_check_subdomain_resp['msg']}")
+                    raise BadRequest(f"Submitted subdomain error: {get(_check_subdomain_resp, 'msg')}")
 
-                if _check_domain_status_code == 200 and not _check_subdomain_resp['data']['result']:
+                if _check_domain_status_code == 200 and not get(_check_subdomain_resp, 'data.result', None):
                     raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
                 create_domain.delay(
