@@ -76,16 +76,15 @@ def create_domain(user: str, subdomain: str, contract_id: str, user_template_id:
         request_headers = bson.json_util.loads(request_headers)
 
         _resp = requests.post(f'{Config.INZ_IAPI_BASE_URL}/telegram/send_message', json={
-            'message': f'''
-                <b>New Domain Release</b>\ndomain: <a href="{get(_resp_create_new_domain, "data.full_domain")}">{get(_resp_create_new_domain, "data.full_domain")}</a>
-                <b>User</b>:
-                    - username: {get(_user_info, "username")}
-                    - email: {get(_user_info, "email")}
-                    - public_address: {get(_user_info, "public_address")}
-                <b>Request Info</b>:
-                    - ip: {get(request_headers, "X-Real-Ip")}
-                    - country: {get(request_headers, "Cf-Ipcountry")}
-            '''
+            'message': f'<b>New Domain Release</b>\ndomain: <a href="{get(_resp_create_new_domain, "data.full_domain")}">{get(_resp_create_new_domain, "data.full_domain")}</a>\
+                \n<b>User</b>:\
+                    \n- username: {get(_user_info, "username")}\
+                    \n- email: {get(_user_info, "email")}\
+                    \n- public_address: {get(_user_info, "public_address")}\
+                \n<b>Request Info</b>:\
+                    \n- ip: {get(request_headers, "X-Real-Ip")}\
+                    \n- country: {get(request_headers, "Cf-Ipcountry")}\
+            '
         }, verify=False, timeout=30)
         return 'DONE'
 
