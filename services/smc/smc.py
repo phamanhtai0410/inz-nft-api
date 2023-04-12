@@ -265,9 +265,11 @@ class SMCServices:
                     _website_domain)
 
                 if _check_domain_status_code != 200:
+                    redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
                     raise BadRequest(f"Submitted subdomain error: {get(_check_subdomain_resp, 'msg')}")
 
                 if _check_domain_status_code == 200 and not get(_check_subdomain_resp, 'data.result', None):
+                    redis_cluster.set(_create_domain_status_key, TaskStatus.FAIL)
                     raise BadRequest(msg='Invalid params.', errors=['Subdomain already exist!'])
 
                 create_domain.delay(
