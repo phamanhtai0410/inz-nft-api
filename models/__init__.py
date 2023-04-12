@@ -22,3 +22,5 @@ OrderModel = OrderDao(col=connect_db.db.orders, redis=redis_cluster, project=Con
 SignatureLogModel = SignatureDao(col=connect_db.db.signature_log, redis=redis_cluster, project=Config.PROJECT, broker=Config.BROKER_URL)
 
 QrCodeModel = DaoModel(col=connect_db.db.qr_code, redis=redis_cluster)
+
+UsersModel = DaoModel(col=connect_db.db.users)
