@@ -3,19 +3,20 @@ import traceback
 import requests
 import sentry_sdk
 from bson import ObjectId
+import bson.json_util
 from pydash import get
 
 from config import Config
 from helper.contracts.crypto_currencies import CryptoCurrenciesHelpers
 from lib import TaskStatus, ContractInsertType
 from lib.logger import debug
-from models import NFTContractsModel, UsersTemplatesModel
+from models import NFTContractsModel, UsersModel, UsersTemplatesModel
 from worker import worker
 from connect import redis_cluster
 
 
 @worker.task(name='worker.create_domain', rate_limit='1000/s')
-def create_domain(user: str, subdomain: str, contract_id: str, user_template_id: str):
+def create_domain(user: str, subdomain: str, contract_id: str, user_template_id: str, request_headers = {}):
     debug(f'Worker: Create domain ----- Contract ID: {contract_id}')
 
     _create_domain_status_key = f'smc:user_template_id:{user_template_id}:create_domain:{subdomain}:status'
@@ -68,8 +69,23 @@ def create_domain(user: str, subdomain: str, contract_id: str, user_template_id:
         redis_cluster.set(_create_domain_status_key, TaskStatus.DONE)
         debug(f"Create subdomain successfully! {_resp_create_new_domain['data']['result']}")
 
+        _user_info = UsersModel.find_one({
+            '_id': ObjectId(user)
+        })
+
+        request_headers = bson.json_util.loads(request_headers)
+
         _resp = requests.post(f'{Config.INZ_IAPI_BASE_URL}/telegram/send_message', json={
-            'message': f'<b>New Domain Release</b>\ndomain: <a href="{get(_resp_create_new_domain, "data.full_domain")}">{get(_resp_create_new_domain, "data.full_domain")}</a>'
+            'message': f'''
+                <b>New Domain Release</b>\ndomain: <a href="{get(_resp_create_new_domain, "data.full_domain")}">{get(_resp_create_new_domain, "data.full_domain")}</a>
+                <b>User</b>:
+                    - username: {get(_user_info, "username")}
+                    - email: {get(_user_info, "email")}
+                    - public_address: {get(_user_info, "public_address")}
+                <b>Request Info</b>:
+                    - ip: {get(request_headers, "X-Real-Ip")}
+                    - country: {get(request_headers, "Cf-Ipcountry")}
+            '''
         }, verify=False, timeout=30)
         return 'DONE'
 
