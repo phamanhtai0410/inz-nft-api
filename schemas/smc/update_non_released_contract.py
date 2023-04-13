@@ -2,9 +2,9 @@ from marshmallow import INCLUDE, Schema, fields, validate, EXCLUDE
 
 # from enums.contract import ContractMethod
 from enums.order import Currency
-from helper.validator import is_valid_number, is_valid_subdomain
-from lib import DatetimeField, Chains, IsObjectId, TokenStandard
-from schemas.smc.create_contract import ContractDescriptionSchema, NFTOfContractSchema
+from helper.validator import is_valid_subdomain
+from lib import SUPPORTED_CHAINS
+from schemas.smc.create_contract import NFTOfContractSchema
 
 
 class SMCUpdateNonReleasedContractRequestSchema(Schema):
@@ -21,11 +21,7 @@ class SMCUpdateNonReleasedContractRequestSchema(Schema):
     highlight_text = fields.Str(allow_none=True)
     # max_allocation = fields.Int(allow_none=True, validate=is_valid_number)
     symbol = fields.Str(allow_none=True)
-    chain = fields.String(required=False, allow_none=True, validate=validate.OneOf([
-        Chains.BSC,
-        Chains.SCROLL,
-        Chains.BASE
-    ]))
+    chain = fields.String(required=False, allow_none=True, validate=validate.OneOf(SUPPORTED_CHAINS))
     currency = fields.String(required=False, allow_none=True, validate=validate.OneOf([
         Currency.USDT,
     ]))
