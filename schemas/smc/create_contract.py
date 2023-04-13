@@ -3,7 +3,7 @@ from marshmallow import Schema, EXCLUDE, fields, RAISE, validate, INCLUDE
 from enums.order import Currency
 # from enums.contract import ContractMethod
 from helper.validator import is_valid_number
-from lib import Chains, IsObjectId, NotBlank, ObjectIdField
+from lib import IsObjectId, NotBlank, ObjectIdField, SUPPORTED_CHAINS
 
 
 class MetadataPropertiesSchema(Schema):
@@ -49,11 +49,7 @@ class SMCCreateContractRequestSchema(Schema):
     symbol = fields.String(required=True, validate=NotBlank())
     # total_supply = fields.Integer(allow_none=True, validate=is_valid_number)
     # total_raise = fields.Float(allow_none=True, validate=is_valid_number)
-    chain = fields.String(required=True, validate=validate.OneOf([
-        Chains.BSC,
-        Chains.BASE,
-        Chains.SCROLL,
-    ]))
+    chain = fields.String(required=True, validate=validate.OneOf(SUPPORTED_CHAINS))
     currency = fields.String(required=True, validate=validate.OneOf([
         Currency.USDT,
     ]))

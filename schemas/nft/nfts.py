@@ -1,5 +1,5 @@
-from marshmallow import Schema, EXCLUDE, fields, RAISE, validate
-from lib import ObjectIdField, Chains
+from marshmallow import Schema, EXCLUDE, fields, validate
+from lib import ObjectIdField, SUPPORTED_CHAINS
 from lib.schema import DatetimeField
 
 
@@ -9,11 +9,7 @@ class NFTsRequestSchema(Schema):
 
     page = fields.Integer(required=False, default=1, allow_none=True)
     page_size = fields.Integer(required=False, default=10, allow_none=True)
-    chain = fields.String(validate=validate.OneOf([
-        Chains.BSC,
-        Chains.SCROLL,
-        Chains.BASE
-    ]), allow_none=True)
+    chain = fields.String(validate=validate.OneOf(SUPPORTED_CHAINS), allow_none=True)
     sort_field = fields.String(allow_none=True)
     sort_type = fields.String(validate=validate.OneOf([
         'desc',
@@ -57,7 +53,7 @@ class NFTsResponseSchema(Schema):
     #     'page_size': page_size,
     #     'page': page
     # }
-    items = fields.List(fields.Nested(NFTSchema), data_key='items', missing=[])
+    items = fields.List(fields.Nested(NFTSchema()), data_key='items', missing=[])
     num_of_page = fields.Integer(data_key='num_of_page', missing=0)
     page_size = fields.Integer(data_key='page_size', missing=10)
     page = fields.Integer(data_key='page', missing=1)
