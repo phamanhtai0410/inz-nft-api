@@ -75,6 +75,8 @@ def create_domain(user: str, subdomain: str, contract_id: str, user_template_id:
 
         request_headers = bson.json_util.loads(request_headers)
 
+        debug(f"request_headers: {request_headers}")
+
         _resp = requests.post(f'{Config.INZ_IAPI_BASE_URL}/telegram/send_message', json={
             'message': f'<b>New Domain Release</b>\ndomain: <a href="{get(_resp_create_new_domain, "data.full_domain")}">{get(_resp_create_new_domain, "data.full_domain")}</a>\
                 \n<b>User</b>:\
