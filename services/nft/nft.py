@@ -1,20 +1,29 @@
+import datetime
 import web3
 import pydash as py_
 import bson
+from enums.nft import MarketplaceAction
 
-from models import NFTContractsModel, NFTsModel
+from exceptions.nfts import CurrencyTokenNotExceptEx, NftIsOnMarketEx, UserNotOwnNftEx
+from exceptions.requests import IsNotValidObjIdEx
+from models import CryptoCurrenciesModel, NFTContractsModel, NFTsModel, OrderModel
 from lib import dt_utcnow
+from connect import redis_cluster
 
 class NFTsServices:
 
+    @staticmethod
+    def is_nft_on_market(item):
+        _buy_deadline = py_.get(item, 'buy_deadline').timestamp() if py_.get(item, 'buy_deadline') else 0
+        _now = dt_utcnow().timestamp()
+        _on_market = True if _buy_deadline > _now else False
+        return _on_market
     @staticmethod
     def mapping_nft_detail(nft_items):
         _nft_contracts = {}
 
         def get_nft_detail(item, contract, type):
-            _buy_deadline = py_.get(item, 'buy_deadline').timestamp() if py_.get(item, 'buy_deadline') else 0
-            _now = dt_utcnow().timestamp()
-            _on_market = True if _buy_deadline > _now else False
+            _on_market = NFTsServices.is_nft_on_market(item=item)
             return {
                 **item,
                 'image_url': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.image_url'),
@@ -25,10 +34,10 @@ class NFTsServices:
                 'properties': py_.get(_nft_contracts[contract], 'properties', []),
                 'actions': py_.get(_nft_contracts[contract], 'actions', []),
                 'standard': py_.get(_nft_contracts[contract], 'standard', []),
+                'highlight_text': py_.get(_nft_contracts[contract], 'highlight_text', []),
                 # NOTE: if nft does not have previous price on sale will get default price
                 'price': py_.get(item, 'price') if py_.get(item, 'price') != None and _on_market else py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.price'),
                 'on_market': _on_market,
-
             }
 
         _items = []
@@ -160,3 +169,80 @@ class NFTsServices:
         )
 
         return _result
+
+    @staticmethod
+    def check_owner_nft(user_id, nft_id):
+        _nft = NFTsModel.find_one({
+            '_id': nft_id,
+            'user': bson.objectid.ObjectId(user_id)
+        })
+
+        if not _nft:
+            raise UserNotOwnNftEx
+
+        return _nft
+
+    @staticmethod
+    def sell_nfts(user_id, form_data):
+        _nft_id = py_.get(form_data, 'nft_id')
+        
+        _nft = NFTsServices.check_owner_nft(user_id=user_id, nft_id=_nft_id)
+
+        if NFTsServices.is_nft_on_market(item=_nft):
+            raise NftIsOnMarketEx
+
+        _currency_address = py_.get(form_data, 'currency_address')
+
+        _currency = CryptoCurrenciesModel.find_one({
+            'chain': py_.get(_nft, 'chain'),
+            'contract_address': _currency_address
+        })
+
+        if not _currency:
+            raise CurrencyTokenNotExceptEx
+
+        _buy_deadline = py_.get(form_data, 'buy_deadline')
+
+        _deadline = dt_utcnow() + datetime.timedelta(days=_buy_deadline)
+        
+        print(_deadline)
+
+        NFTsModel.sell_nft(sell_data={
+            **form_data,
+            'buy_deadline': _deadline
+        })
+
+
+        _log_data = {
+            **_nft,
+            **form_data,
+            'buy_deadline': _deadline
+        }
+
+        OrderModel.insert_one({
+            'action': MarketplaceAction.SELL,
+            'data': _log_data,
+            'created_by': 'inz-nft-api:services:NFTsServices:sell_user_nfts'
+        })
+
+        return {}
+
+    @staticmethod
+    def cancel_sell_nfts(user_id, nft_id):
+        if not bson.objectid.ObjectId.is_valid(nft_id):
+            raise IsNotValidObjIdEx
+
+        nft_id= bson.objectid.ObjectId(nft_id)
+
+        _nft = NFTsServices.check_owner_nft(user_id=user_id, nft_id=nft_id)
+
+        NFTsModel.cancel_sell_nft(nft_id=nft_id)
+
+        OrderModel.insert_one({
+            'action': MarketplaceAction.CANCEL_SELL,
+            'data': _nft,
+            'created_by': 'inz-nft-api:services:NFTsServices:sell_user_nfts'
+        })
+
+        return {}
+
