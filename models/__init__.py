@@ -11,8 +11,9 @@ from connect import connect_db, redis_cluster
 from lib import DaoModel
 from models.order import OrderDao
 from models.signature import SignatureDao
+from models.nft import NftDao
 
-NFTsModel = DaoModel(col=connect_db.db.nft, redis=redis_cluster)
+NFTsModel = NftDao(col=connect_db.db.nft, redis=redis_cluster)
 NFTContractsModel = DaoModel(col=connect_db.db.nft_contracts, redis=redis_cluster)
 UsersContractsModel = DaoModel(col=connect_db.db.users_contracts, redis=redis_cluster)
 UsersTemplatesModel = DaoModel(col=connect_db.db.users_templates, redis=redis_cluster)
