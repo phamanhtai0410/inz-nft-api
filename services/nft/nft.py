@@ -19,6 +19,12 @@ class NFTsServices:
                 **item,
                 'image_url': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.image_url'),
                 'name': py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.name'),
+                'currency_address': py_.get(_nft_contracts[contract], f'currency_address'),
+                'chain_id': py_.get(_nft_contracts[contract], 'chain_id'),
+                'chain': py_.get(_nft_contracts[contract], 'chain'),
+                'properties': py_.get(_nft_contracts[contract], 'properties', []),
+                'actions': py_.get(_nft_contracts[contract], 'actions', []),
+                'standard': py_.get(_nft_contracts[contract], 'standard', []),
                 # NOTE: if nft does not have previous price on sale will get default price
                 'price': py_.get(item, 'price') if py_.get(item, 'price') != None and _on_market else py_.get(_nft_contracts[contract], f'nft_list.{type - 1}.price'),
                 'on_market': _on_market,

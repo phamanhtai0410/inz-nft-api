@@ -37,7 +37,13 @@ class NFTSchema(Schema):
     price = fields.Float(default=0, missing=0)
     name = fields.String(default='', missing='')
     buy_deadline = DatetimeField()
-    buy_signature = fields.String(allow_none=True)
+    currency_address= fields.String(required=True)
+    chain_id = fields.Integer(required=True)
+    chain = fields.String(required=True)
+    properties = fields.Raw(default=[], missing=[])
+    actions = fields.Raw(default=[], missing=[])
+    standard = fields.String(allow_none=True)
+    # buy_signature = fields.String(allow_none=True)
 
 
 class NFTsResponseSchema(Schema):
