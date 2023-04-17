@@ -194,7 +194,7 @@ class NFTsServices:
         _currency_address = py_.get(form_data, 'currency_address')
 
         _currency = CryptoCurrenciesModel.find_one({
-            'chain': py_.get(_nft, 'chain'),
+            # 'chain': py_.get(_nft, 'chain'),
             'contract_address': _currency_address
         })
 
