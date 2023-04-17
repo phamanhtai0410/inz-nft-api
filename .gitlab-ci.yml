@@ -99,12 +99,13 @@ build_stag:
 
 deploy_APP_NAME_API_stag:
   stage: deploy
-  image:  alpine/helm:3.2.1
+  image:  968557029040.dkr.ecr.ap-southeast-1.amazonaws.com/base-cicd:alpine-helm-3.0.1
   tags:
   - esol-stag
   script:
-    - *predeploy
     - *kubectl_config
+    - mv /apps/helm-template .
+    - mv /apps/helm-template-cronjob .
     - |
       if [ "$CI_COMMIT_REF_NAME" == "stag" ]; then
         sed -i -e "s#\[NAMESPACE\]#$NAMESPACE_STAG#g" skaffold.yaml
@@ -125,12 +126,13 @@ deploy_APP_NAME_API_stag:
 
 deploy_APP_NAME_API_WOKER_stag:
   stage: deploy
-  image:  alpine/helm:3.2.1
+  image:  968557029040.dkr.ecr.ap-southeast-1.amazonaws.com/base-cicd:alpine-helm-3.0.1
   tags:
   - esol-stag
   script:
-    - *predeploy
     - *kubectl_config
+    - mv /apps/helm-template .
+    - mv /apps/helm-template-cronjob .
     - |
       if [ "$CI_COMMIT_REF_NAME" == "stag" ]; then
         sed -i -e "s#\[NAMESPACE\]#$NAMESPACE_STAG#g" skaffold.yaml
@@ -189,12 +191,13 @@ build_testnet:
 
 deploy_APP_NAME_API_testnet:
   stage: deploy
-  image:  alpine/helm:3.2.1
+  image:  968557029040.dkr.ecr.ap-southeast-1.amazonaws.com/base-cicd:alpine-helm-3.0.1
   tags:
   - esol-stag
   script:
-    - *predeploy
     - *kubectl_config
+    - mv /apps/helm-template .
+    - mv /apps/helm-template-cronjob .
     - |
       if [ "$CI_COMMIT_REF_NAME" == "testnet" ]; then
         sed -i -e "s#\[NAMESPACE\]#$NAMESPACE_TESTNET#g" skaffold.yaml
@@ -214,12 +217,13 @@ deploy_APP_NAME_API_testnet:
 
 deploy_APP_NAME_API_WORKER_testnet:
   stage: deploy
-  image:  alpine/helm:3.2.1
+  image:  968557029040.dkr.ecr.ap-southeast-1.amazonaws.com/base-cicd:alpine-helm-3.0.1
   tags:
   - esol-stag
   script:
-    - *predeploy
     - *kubectl_config
+    - mv /apps/helm-template .
+    - mv /apps/helm-template-cronjob .
     - |
       if [ "$CI_COMMIT_REF_NAME" == "testnet" ]; then
         sed -i -e "s#\[NAMESPACE\]#$NAMESPACE_TESTNET#g" skaffold.yaml
