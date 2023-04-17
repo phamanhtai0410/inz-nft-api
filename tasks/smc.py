@@ -16,7 +16,7 @@ from connect import redis_cluster
 
 
 @worker.task(name='worker.create_domain', rate_limit='1000/s')
-def create_domain(user: str, subdomain: str, contract_id: str, user_template_id: str, request_headers = {}):
+def create_domain(user: str, subdomain: str, contract_id: str, user_template_id: str, request_headers={}):
     debug(f'Worker: Create domain ----- Contract ID: {contract_id}')
 
     _create_domain_status_key = f'smc:user_template_id:{user_template_id}:create_domain:{subdomain}:status'
@@ -77,15 +77,22 @@ def create_domain(user: str, subdomain: str, contract_id: str, user_template_id:
 
         debug(f"request_headers: {request_headers}")
 
+        _origin = get(request_headers, "Origin", "")
+        _ip = get(request_headers, "X-Real-Ip")
+        _username = get(_user_info, "username")
+        _email = get(_user_info, "email")
+        _public_address = get(_user_info, "public_address")
+        _country = get(request_headers, "Cf-Ipcountry")
         _resp = requests.post(f'{Config.INZ_IAPI_BASE_URL}/telegram/send_message', json={
             'message': f'<b>New Domain Release</b>\ndomain: <a href="{get(_resp_create_new_domain, "data.full_domain")}">{get(_resp_create_new_domain, "data.full_domain")}</a>\
                 \n<b>User</b>:\
-                    \n- username: {get(_user_info, "username")}\
-                    \n- email: {get(_user_info, "email")}\
-                    \n- public_address: {get(_user_info, "public_address")}\
+                    \n- Username: {_username}\
+                    \n- Email: {_email}\
+                    \n- Public Address: {_public_address}\
                 \n<b>Request Info</b>:\
-                    \n- ip: {get(request_headers, "X-Real-Ip")}\
-                    \n- country: {get(request_headers, "Cf-Ipcountry")}\
+                    \n- IP: {_ip}\
+                    \n- Origin: {_origin}\
+                    \n- Country: {_country}\
             '
         }, verify=False, timeout=30)
         return 'DONE'
