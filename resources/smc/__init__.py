@@ -12,6 +12,8 @@ from resources.smc.release_contract import SMCReleaseContractResource
 from resources.smc.delete_contract import SMCDeleteContractResource
 from resources.smc.contracts import ContractsResource
 from resources.smc.signature import SMCSignatureResource
+from resources.smc.signature_buy_nft import SMCSignatureBuyNftResource
+
 
 smc_resources = {
     '/list': ContractsResource,
@@ -21,5 +23,7 @@ smc_resources = {
     '/delete': SMCDeleteContractResource,
     '/update/non_released': SMCUpdateNonReleasedContractResource,
     '/update/released': SMCUpdateReleasedContractResource,
-    '/signature': SMCSignatureResource
+    '/signature': SMCSignatureResource,
+    '/signature/buy_nft': SMCSignatureBuyNftResource,
+    
 }
