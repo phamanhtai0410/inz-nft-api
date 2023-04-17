@@ -118,7 +118,7 @@ deploy_APP_NAME_API_stag:
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.38.0/skaffold-linux-amd64 && chmod +x skaffold &&  mv skaffold /usr/local/bin
     - /usr/local/bin/skaffold deploy -p profile-${APP_NAME_API}-stag   -a build_sync.json
-
+  retry: 2
   only:
     refs:
       - stag
@@ -145,7 +145,7 @@ deploy_APP_NAME_API_WOKER_stag:
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.38.0/skaffold-linux-amd64 && chmod +x skaffold &&  mv skaffold /usr/local/bin
     - /usr/local/bin/skaffold deploy -p profile-${APP_NAME_API_WORKER}-stag   -a build_sync.json
-
+  retry: 2
   only:
     refs:
       - stag
@@ -210,7 +210,7 @@ deploy_APP_NAME_API_testnet:
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.38.0/skaffold-linux-amd64 && chmod +x skaffold &&  mv skaffold /usr/local/bin
     - /usr/local/bin/skaffold deploy -p profile-${APP_NAME_API}-testnet   -a build_sync.json
-
+  retry: 2
   only:
     refs:
       - testnet
@@ -236,7 +236,7 @@ deploy_APP_NAME_API_WORKER_testnet:
     - curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl && chmod +x ./kubectl && mv ./kubectl /usr/local/bin/kubectl
     - curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/v1.38.0/skaffold-linux-amd64 && chmod +x skaffold &&  mv skaffold /usr/local/bin
     - /usr/local/bin/skaffold deploy -p profile-${APP_NAME_API_WORKER}-testnet   -a build_sync.json
-
+  retry: 2
   only:
     refs:
       - testnet
