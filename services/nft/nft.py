@@ -6,7 +6,7 @@ from enums.nft import MarketplaceAction
 
 from exceptions.nfts import CurrencyTokenNotExceptEx, NftIsOnMarketEx, NftNotFoundEx, UserNotOwnNftEx
 from exceptions.requests import IsNotValidObjIdEx
-from models import CryptoCurrenciesModel, NFTContractsModel, NFTsModel, OrderModel
+from models import CryptoCurrenciesModel, NFTContractsModel, NFTsModel, OrderModel, UsersModel
 from lib import dt_utcnow
 from connect import redis_cluster
 
@@ -21,6 +21,7 @@ class NFTsServices:
     @staticmethod
     def mapping_nft_detail(nft_items):
         _nft_contracts = {}
+        _users_info = {}
 
         def get_nft_detail(item, contract, type):
             _on_market = NFTsServices.is_nft_on_market(item=item)
@@ -45,22 +46,31 @@ class NFTsServices:
         for _item in nft_items:
             _contract = py_.get(_item, 'contract').lower()
             _type = py_.get(_item, 'type')
-            if _contract in _nft_contracts:
-                _item = get_nft_detail(_item, _contract, _type)
-                _items.append(_item)
-                continue
+            if not _contract in _nft_contracts:
+                # NOTE: cache later
+                _nft_contract = NFTContractsModel.find_one({
+                    'contract': _contract
+                })
+
+                if not _nft_contract:
+                    continue
+
+                py_.set_(_nft_contracts, _contract, _nft_contract)
             
-            # NOTE: cache later
-            _nft_contract = NFTContractsModel.find_one({
-                'contract': _contract
-            })
+            _user_id = py_.get(_item, 'user')
+            if not _user_id in _users_info:
+                _user = UsersModel.find_one({
+                    '_id': _user_id
+                })
+                if _user:
+                    py_.set_(_users_info, _user_id, _user)
 
-            if not _nft_contract:
-                continue
-
-            py_.set_(_nft_contracts, _contract, _nft_contract)
-
+            # NOTE: get detail of nft
             _item = get_nft_detail(_item, _contract, _type)
+
+            # NOTE: mapping owner info
+            _user = py_.get(_users_info, _user_id, {})
+            py_.set_(_item, 'owner', _user)
 
             _items.append(_item)
 

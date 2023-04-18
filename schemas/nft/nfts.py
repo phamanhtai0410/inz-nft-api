@@ -1,6 +1,7 @@
 from marshmallow import Schema, EXCLUDE, fields, validate
 from lib import ObjectIdField, SUPPORTED_CHAINS
 from lib.schema import DatetimeField
+from schemas.users.users import UsersSchema
 
 
 class NFTsRequestSchema(Schema):
@@ -29,6 +30,7 @@ class NFTSchema(Schema):
     type = fields.Integer(required=True)
     metadata_link = fields.String(default='', missing='', allow_none=True)
     user = ObjectIdField()
+    owner_address = fields.String(default='', missing='')
     image_url = fields.String(default='', missing='', allow_none=True)
     price = fields.Float(default=0, missing=0)
     name = fields.String(default='', missing='')
@@ -41,6 +43,7 @@ class NFTSchema(Schema):
     standard = fields.String(allow_none=True)
     highlight_text = fields.String(allow_none=True)
     order_id = fields.Integer(allow_none=True)
+    owner = fields.Nested(UsersSchema, default={}, missing={})
     # buy_signature = fields.String(allow_none=True)
 
 
