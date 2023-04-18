@@ -4,7 +4,7 @@ import pydash as py_
 import bson
 from enums.nft import MarketplaceAction
 
-from exceptions.nfts import CurrencyTokenNotExceptEx, NftIsOnMarketEx, UserNotOwnNftEx
+from exceptions.nfts import CurrencyTokenNotExceptEx, NftIsOnMarketEx, NftNotFoundEx, UserNotOwnNftEx
 from exceptions.requests import IsNotValidObjIdEx
 from models import CryptoCurrenciesModel, NFTContractsModel, NFTsModel, OrderModel
 from lib import dt_utcnow
@@ -119,6 +119,26 @@ class NFTsServices:
         py_.set_(_results, 'items', _items)
         
         return _results
+
+    @classmethod
+    def get_nft_by_id(
+        cls,
+        nft_id,
+    ):
+        if not bson.objectid.ObjectId.is_valid(nft_id):
+            raise IsNotValidObjIdEx
+        
+        _nft = NFTsModel.find_one({
+            '_id': bson.objectid.ObjectId(nft_id)
+        })
+
+        if not _nft:
+            raise NftNotFoundEx
+
+        # mapping nft detail will map and return list
+        _nft = NFTsServices.mapping_nft_detail([_nft])
+
+        return py_.get(_nft, '0')
 
     @staticmethod
     def get_marketplace_by_contracts(params):
